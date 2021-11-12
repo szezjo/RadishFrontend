@@ -29,7 +29,7 @@ class _LoadingPageState extends State<LoadingPage> {
                   Navigator.pushNamed(context, "/home");
                   },
                 icon: const Icon(Icons.home),
-                label: Text("Go Home"))
+                label: const Text("Go Home"))
           ],
         ),
       ),
