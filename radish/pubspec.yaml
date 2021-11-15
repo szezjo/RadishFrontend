@@ -63,6 +63,8 @@ flutter:
     - images/loadIcon2.png
     - images/loadIcon3.png
     - images/loadIcon4.png
+    - images/loader.gif
+    - images/loader_rewind.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
