@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:radish/pages/home.dart';
+import 'package:radish/pages/welcome.dart';
 
 class LoadingPage extends StatefulWidget {
+  const LoadingPage({Key? key}) : super(key: key);
+
   @override
   State<LoadingPage> createState() => _LoadingPageState();
 }
