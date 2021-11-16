@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:radish/pages/home.dart';
 import 'package:radish/pages/loading.dart';
+import 'package:radish/theme/theme_config.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const Radish());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class Radish extends StatelessWidget {
+  const Radish({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Radish',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeConfig.darkTheme,
       routes: {
         "/": (context) => const LoadingPage(title: "Loading Page"),
         "/home": (context) => const MyHomePage(title: 'Home Page'),
