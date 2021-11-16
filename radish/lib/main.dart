@@ -16,7 +16,7 @@ class Radish extends StatelessWidget {
       title: 'Radish',
       theme: ThemeConfig.darkTheme,
       routes: {
-        "/": (context) => const LoadingPage(title: "Loading Page"),
+        "/": (context) => LoadingPage(),
         "/home": (context) => const MyHomePage(title: 'Home Page'),
       }
     );

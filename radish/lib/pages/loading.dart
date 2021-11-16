@@ -1,38 +1,43 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:radish/pages/home.dart';
 
 class LoadingPage extends StatefulWidget {
-  const LoadingPage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
   @override
   State<LoadingPage> createState() => _LoadingPageState();
 }
 
 class _LoadingPageState extends State<LoadingPage> {
 
+  void setupApp() async {
+    await Future.delayed(const Duration(seconds: 15));
+    Navigator.pushReplacement(context, PageRouteBuilder(
+      pageBuilder: (c, a1, a2) => const MyHomePage(title: "Homey!"),
+      transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setupApp();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'This is a loading screen.',
-            ),
-            TextButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, "/home");
-                  },
-                icon: const Icon(Icons.home),
-                label: const Text("Go Home"))
-          ],
-        ),
-      ),
+        body: AnimatedContainer(
+            duration: const Duration(milliseconds: 1000),
+            child: Center(
+              child: Image.asset(
+              'images/loader_rewind.gif',
+              height: 150,
+              width: 150,
+            )
+            )
+        )
     );
   }
 }
