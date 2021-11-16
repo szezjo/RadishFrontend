@@ -1,31 +1,35 @@
 import 'package:flutter/material.dart';
 
 class ThemeConfig {
-  static Color darkPrimary = const Color(0xFFF24E1E);
-  static Color darkNav = const Color(0xFF272727);
-  static Color darkSecondary = const Color(0xFF171717);
-  static Color darkAccent = const Color(0xFFF24E1E);
-  static Color darkBG = const Color(0xFF202020);
-  static Color darkTextPrimary = const Color(0xFFFFFFFF);
-  static Color darkTextSecondary = const Color(0xFFC4C4C4);
+  static Color darkBGPrimary = const Color(0xFF171717); // main bg
+  static Color darkBGSecondary = const Color(0xFF202020); // top bar & bg without bar
+  static Color darkNavbar = const Color(0xFF272727); // bottom navbar
+  static Color darkAccentPrimary = const Color(0xFFF24E1E); // icons, tags...
+  static Color darkInactivePrimary = const Color(0xFF818181); // inactive navbar icon primary
+  static Color darkInactiveSecondary = const Color(0xFFCCCCCC); // inactive navbar icon secondary
+  static Color darkTextPrimary = const Color(0xFFFFFFFF); // text primary
+  static Color darkTextSecondary = const Color(0xFFC7C7C7); // text secondary
+  static Color darkDivider = const Color(0xFF303030); // dividers in lists
+  static Color darkIcons = const Color(0xFFC4C4C4); // icons (like, setting, followers)
+  static Color darkAccentSecondary = const Color(0xFF8FC267); // online status...
 
   static ThemeData darkTheme = ThemeData(
     colorScheme: ColorScheme(
-        primary: darkPrimary,
-        primaryVariant: darkPrimary,
-        secondary: darkSecondary,
-        secondaryVariant: darkSecondary,
-        surface: darkSecondary,
-        background: darkBG,
-        error: darkAccent,
-        onPrimary: darkAccent,
-        onSecondary: darkAccent,
-        onSurface: darkAccent,
-        onBackground: darkAccent,
-        onError: darkAccent,
+        primary: darkBGSecondary,
+        primaryVariant: darkNavbar,
+        secondary: darkAccentPrimary,
+        secondaryVariant: darkAccentPrimary,
+        surface: darkBGSecondary,
+        background: darkBGPrimary,
+        error: darkAccentPrimary,
+        onPrimary: darkAccentPrimary,
+        onSecondary: darkAccentPrimary,
+        onSurface: darkBGSecondary,
+        onBackground: darkBGSecondary,
+        onError: darkAccentPrimary,
         brightness: Brightness.dark,
     ),
-    scaffoldBackgroundColor: darkBG,
+    scaffoldBackgroundColor: darkBGPrimary,
     fontFamily: 'DM Sans',
     textTheme: TextTheme(
       headline1: TextStyle(fontSize: 72.0, color: darkTextPrimary),
