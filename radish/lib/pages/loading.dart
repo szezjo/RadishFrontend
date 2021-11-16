@@ -28,7 +28,6 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue[900],
         body: AnimatedContainer(
             duration: const Duration(milliseconds: 1000),
             child: Center(
