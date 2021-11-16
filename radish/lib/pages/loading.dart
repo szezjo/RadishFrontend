@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:radish/pages/home.dart';
+import 'package:radish/pages/welcome.dart';
 
 class LoadingPage extends StatefulWidget {
+  const LoadingPage({Key? key}) : super(key: key);
+
   @override
   State<LoadingPage> createState() => _LoadingPageState();
 }
@@ -12,7 +15,7 @@ class _LoadingPageState extends State<LoadingPage> {
   void setupApp() async {
     await Future.delayed(const Duration(seconds: 15));
     Navigator.pushReplacement(context, PageRouteBuilder(
-      pageBuilder: (c, a1, a2) => const MyHomePage(title: "Homey!"),
+      pageBuilder: (c, a1, a2) => const WelcomePage(),
       transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
       transitionDuration: const Duration(milliseconds: 500),
     ),

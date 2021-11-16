@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:radish/pages/home.dart';
 import 'package:radish/pages/loading.dart';
+import 'package:radish/pages/welcome.dart';
+import 'package:radish/pages/login.dart';
+import 'package:radish/pages/signup.dart';
 import 'package:radish/theme/theme_config.dart';
 
 void main() {
@@ -17,6 +20,9 @@ class Radish extends StatelessWidget {
       theme: ThemeConfig.darkTheme,
       routes: {
         "/": (context) => LoadingPage(),
+        "/welcome": (context) => const WelcomePage(),
+        "/login": (context) => const LoginPage(),
+        "/signup": (context) => const SignUpPage(),
         "/home": (context) => const MyHomePage(title: 'Home Page'),
       }
     );
