@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:radish/pages/home.dart';
-import 'package:radish/pages/welcome.dart';
+import 'package:radish/screens/home.dart';
+import 'package:radish/screens/welcome.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({Key? key}) : super(key: key);

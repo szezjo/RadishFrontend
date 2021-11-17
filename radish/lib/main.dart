@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:radish/pages/home.dart';
-import 'package:radish/pages/loading.dart';
-import 'package:radish/pages/welcome.dart';
-import 'package:radish/pages/login.dart';
-import 'package:radish/pages/signup.dart';
+import 'package:radish/screens/home.dart';
+import 'package:radish/screens/loading.dart';
+import 'package:radish/screens/welcome.dart';
+import 'package:radish/screens/login.dart';
+import 'package:radish/screens/signup.dart';
 import 'package:radish/theme/theme_config.dart';
 
 void main() {
@@ -18,8 +18,9 @@ class Radish extends StatelessWidget {
     return MaterialApp(
       title: 'Radish',
       theme: ThemeConfig.darkTheme,
+      initialRoute: "/login",
       routes: {
-        "/": (context) => LoadingPage(),
+        "/": (context) => const LoadingPage(),
         "/welcome": (context) => const WelcomePage(),
         "/login": (context) => const LoginPage(),
         "/signup": (context) => const SignUpPage(),
