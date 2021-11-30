@@ -1,15 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_radio_player/flutter_radio_player.dart';
+import 'dart:async';
 
 class CurrentlyPlaying extends StatefulWidget {
   const CurrentlyPlaying({Key? key}) : super(key: key);
+  final playerState = FlutterRadioPlayer.flutter_radio_paused;
 
   @override
   State<CurrentlyPlaying> createState() => _CurrentlyPlayingState();
 }
 
 class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
+  FlutterRadioPlayer _radioPlayer = FlutterRadioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    initRadioService();
+  }
+
+  Future<void> initRadioService() async {
+    try {
+      await _radioPlayer.init(
+        "Flutter Radio Player",
+        "Live",
+        "http://ais.absoluteradio.co.uk/absoluteclassicrock.mp3?",
+        "true"
+      );
+    } on PlatformException {
+      print("Exception occurred while trying to register the services.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String getTitle(String metadata) {
+      if(metadata.contains('ICY: ') && metadata.contains('title=')) {
+        int start = metadata.indexOf('title=');
+        start+=7;
+        String sub = metadata.substring(start);
+        int end = sub.indexOf('"');
+        return sub.substring(0, end);
+      }
+      else {
+        return '';
+      }
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -57,15 +95,30 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                     ),
                     Column(
                       mainAxisSize: MainAxisSize.max,
-                      children: const [
-                        Text(
-                          'Innocent',
-                          style: TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.bold)
+                      children: [
+                        StreamBuilder(
+                          initialData: "",
+                          stream: _radioPlayer.metaDataStream,
+                          builder: (context, snapshot) {
+                            var title = getTitle(snapshot.data.toString());
+                            print(title);
+                            if(title=='') {
+                              return const Text('Playing', style: TextStyle(color: Colors.grey, fontSize: 18));
+                            }
+                            else {
+                              return Text(title, style: const TextStyle(fontSize: 18));
+                            }
+                            
+                          },
                         ),
-                        Text(
-                          'Mike Oldfield',
-                          style: TextStyle(color: Colors.grey, fontSize: 18)
-                        )
+                        // Text(
+                        //   'Innocent',
+                        //   style: TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.bold)
+                        // ),
+                        // Text(
+                        //   'Mike Oldfield',
+                        //   style: TextStyle(color: Colors.grey, fontSize: 18)
+                        // )
                       ],
                     )
                   ],
@@ -77,18 +130,43 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: const [
-                    Icon(
-                      Icons.stop_rounded,
-                      color: Colors.grey,
-                      size: 36,
+                  children: [
+                    StreamBuilder(
+                      stream: _radioPlayer.isPlayingStream,
+                      initialData: widget.playerState,
+                      builder: (context, snapshot) {
+                        if (snapshot.data == FlutterRadioPlayer.flutter_radio_playing) {
+                          return IconButton(
+                            onPressed: () async {
+                              await _radioPlayer.stop();
+                            },
+                            icon: const Icon(
+                              Icons.stop_rounded,
+                              color: Colors.grey,
+                              size: 36,
+                            ),
+                          );
+                        }
+                        else {
+                          return IconButton(
+                            onPressed: () async {
+                              await initRadioService();
+                            },
+                            icon: const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.grey,
+                              size: 36,
+                            ),
+                          );
+                        }
+                      },
                     ),
-                    Icon(
+                    const Icon(
                       Icons.favorite_border,
                       color: Colors.white10,
                       size: 60,
                     ),
-                    Icon(
+                    const Icon(
                       Icons.keyboard_control,
                       color: Colors.grey,
                       size: 36,
