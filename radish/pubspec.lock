@@ -217,7 +217,7 @@ packages:
     source: hosted
     version: "2.0.5"
   flutter_radio_player:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       path: "../flutter_radio_player"
       relative: true

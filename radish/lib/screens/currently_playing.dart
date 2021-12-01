@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_radio_player/flutter_radio_player.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+import 'package:radish/models/station.dart';
 
 class CurrentlyPlaying extends StatefulWidget {
   const CurrentlyPlaying({Key? key}) : super(key: key);
@@ -13,6 +17,7 @@ class CurrentlyPlaying extends StatefulWidget {
 
 class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
   FlutterRadioPlayer _radioPlayer = FlutterRadioPlayer();
+  // late Station station;
 
   @override
   void initState() {
@@ -20,12 +25,30 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
     initRadioService();
   }
 
+  // Future<String> getStationData() async {
+  //   SharedPreferences storage = await SharedPreferences.getInstance();
+  //   var userData = storage.getString('currentlyPlaying');
+  //   Map json = jsonDecode(userData.toString());
+  //   Map<String, dynamic> stringQueryParameters =
+  //   json.map((key, value) => MapEntry(key.toString(), value));
+  //
+  //   setState(() {
+  //     station = Station.fromJson(stringQueryParameters);
+  //   });
+  //   return station.streams!.url!;
+  // }
+
   Future<void> initRadioService() async {
+    // final url = await getStationData();
+    // await Future.delayed(const Duration(seconds: 2));
+    // print(url);
+    // print(station.streams!.url!);
+    String url = "http://ais.absoluteradio.co.uk/absoluteclassicrock.mp3?";
     try {
       await _radioPlayer.init(
         "Flutter Radio Player",
         "Live",
-        "http://ais.absoluteradio.co.uk/absoluteclassicrock.mp3?",
+          url,
         "true"
       );
     } on PlatformException {
@@ -35,6 +58,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
 
   @override
   Widget build(BuildContext context) {
+
     String getTitle(String metadata) {
       if(metadata.contains('ICY: ') && metadata.contains('title=')) {
         int start = metadata.indexOf('title=');
@@ -62,13 +86,14 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: const [
+                  children: [
                     Text(
                       'Currently playing',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey, fontSize: 14)
                     ),
                     Text(
+                      // station.name ?? "",
                       "Absolute Radio",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)

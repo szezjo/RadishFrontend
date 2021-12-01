@@ -27,8 +27,7 @@ class _StationPageState extends State<StationPage> {
     String station = jsonEncode(this.station);
     storage.setString('currentlyPlaying', station);
 
-    print("Going to currently playing!");
-    // Navigator.pushNamed(context, "/play");
+    Navigator.pushNamed(context, "/player");
   }
 
   getUserData() async {

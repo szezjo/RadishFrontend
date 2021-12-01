@@ -13,14 +13,14 @@ class LoadingPage extends StatefulWidget {
 class _LoadingPageState extends State<LoadingPage> {
 
   void setupApp() async {
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 4));
     Navigator.pushReplacementNamed(context, "/welcome");
   }
 
   @override
   void initState() {
     super.initState();
-    //setupApp();
+    setupApp();
   }
 
   @override
