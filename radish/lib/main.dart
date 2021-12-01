@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:radish/screens/home.dart';
 import 'package:radish/screens/listen.dart';
 import 'package:radish/screens/loading.dart';
+import 'package:radish/screens/station.dart';
 import 'package:radish/screens/station_list.dart';
 import 'package:radish/screens/welcome.dart';
 import 'package:radish/screens/login.dart';
@@ -34,6 +35,10 @@ class Radish extends StatelessWidget {
           case "/listen": {  page = const ListenPage(); }
           break;
           case "/stations": {  page = const StationListPage(); }
+          break;
+          case "/station": {  page = const StationPage(); }
+          break;
+          case "/play": {  page = const ListenPage(); } // TODO: CurrentlyPlaying
           break;
           default: { page = const LoadingPage(); }
           break;
