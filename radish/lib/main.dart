@@ -4,6 +4,7 @@ import 'package:radish/pages/loading.dart';
 import 'package:radish/pages/welcome.dart';
 import 'package:radish/pages/login.dart';
 import 'package:radish/pages/signup.dart';
+import 'package:radish/pages/spotify_auth.dart';
 import 'package:radish/theme/theme_config.dart';
 
 void main() {
@@ -18,12 +19,13 @@ class Radish extends StatelessWidget {
     return MaterialApp(
       title: 'Radish',
       theme: ThemeConfig.darkTheme,
+      initialRoute: "/home",
       routes: {
         "/": (context) => LoadingPage(),
         "/welcome": (context) => const WelcomePage(),
         "/login": (context) => const LoginPage(),
         "/signup": (context) => const SignUpPage(),
-        "/home": (context) => const MyHomePage(title: 'Home Page'),
+        "/home": (context) => const SpotifyAuthPage(title: 'Home Page'),
       }
     );
   }
