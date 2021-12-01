@@ -77,7 +77,7 @@ class _SpotifyAuthPageState extends State<SpotifyAuthPage> {
 
   Future<void> _search(SpotifyApi spotify) async {
     var search = await spotify.search
-        .get('愛し子よ')
+        .get('toto africa')
         .first(2)
         .catchError((err) => print((err as SpotifyException).message));
     if (search == null) {
@@ -201,7 +201,7 @@ class _SpotifyAuthPageState extends State<SpotifyAuthPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'Your token:',
+              'Click the button',
             ),
             Text(
               _token,
