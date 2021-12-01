@@ -30,7 +30,7 @@ class ThemeConfig {
         brightness: Brightness.dark,
     ),
     scaffoldBackgroundColor: darkBGPrimary,
-    fontFamily: 'DM Sans',
+    fontFamily: 'DMSans',
     textTheme: TextTheme(
       headline1: TextStyle(fontSize: 72.0, color: darkTextPrimary),
       headline2: TextStyle(fontSize: 50.0, color: darkTextPrimary),
