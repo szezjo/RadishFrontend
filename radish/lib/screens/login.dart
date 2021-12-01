@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:radish/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -28,14 +29,20 @@ class _LoginPageState extends State<LoginPage> {
         'password': password,
       }),
     );
-    print("response.statusCode");
-    print(response.statusCode);
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T LOG IN");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
 
+    SharedPreferences storage = await SharedPreferences.getInstance();
     Map<String, dynamic> userMap = jsonDecode(response.body);
-    var user = User.fromJson(userMap);
+    String user = jsonEncode(User.fromJson(userMap));
+    storage.setString('userData', user);
 
+    print("LOGGED IN");
 
-    // Navigator.pushReplacementNamed(context, "/home")
+    Navigator.pushReplacementNamed(context, "/listen");
   }
 
   @override

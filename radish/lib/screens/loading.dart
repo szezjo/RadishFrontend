@@ -13,13 +13,8 @@ class LoadingPage extends StatefulWidget {
 class _LoadingPageState extends State<LoadingPage> {
 
   void setupApp() async {
-    await Future.delayed(const Duration(seconds: 15));
-    Navigator.pushReplacement(context, PageRouteBuilder(
-      pageBuilder: (c, a1, a2) => const WelcomePage(),
-      transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-      transitionDuration: const Duration(milliseconds: 500),
-    ),
-    );
+    await Future.delayed(const Duration(seconds: 5));
+    Navigator.pushReplacementNamed(context, "/welcome");
   }
 
   @override
@@ -35,7 +30,7 @@ class _LoadingPageState extends State<LoadingPage> {
             duration: const Duration(milliseconds: 1000),
             child: Center(
               child: Image.asset(
-              'images/loader_rewind.gif',
+              'images/loader.gif',
               height: 150,
               width: 150,
             )

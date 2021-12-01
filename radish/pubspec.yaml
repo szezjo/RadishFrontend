@@ -29,6 +29,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  json_serializable: ^6.0.1
+  json_annotation: ^4.3.0
+  build_runner: ^2.1.5
+  shared_preferences: ^2.0.9
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -60,14 +64,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/loadIcon1.png
-    - images/loadIcon2.png
-    - images/loadIcon3.png
-    - images/loadIcon4.png
     - images/loader.gif
-    - images/loader_rewind.gif
     - images/bg_login.png
     - images/logo_white.png
+    - images/headerBg.png
+    - images/stationPlaceholder.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -81,7 +82,7 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: DM Sans
+    - family: DMSans
       fonts:
         - asset: fonts/DMSans-Bold.ttf
           weight: 700
