@@ -52,7 +52,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
     // String url = "http://ais.absoluteradio.co.uk/absoluteclassicrock.mp3?";
     try {
       await _radioPlayer.init(
-        "Flutter Radio Player",
+        "Radish",
         "Live",
           url,
         "true"
