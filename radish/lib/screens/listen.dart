@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:radish/custom_widgets/catalogues_slider.dart';
+import 'package:radish/models/catalogues.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:radish/models/user.dart';
 import 'package:radish/custom_widgets/station_slider.dart';
@@ -18,7 +20,7 @@ class _ListenPageState extends State<ListenPage> {
   List<Station>? favStations;
   List<Station>? recentStations;
   List<Station>? checkStations;
-  List<Station>? categoryStations;
+  Catalogues? cataloguesStations;
   User? user;
 
   getUserData() async {
@@ -34,16 +36,16 @@ class _ListenPageState extends State<ListenPage> {
   }
 
 
-  getFavStations() async {
-    if (this.user == null) {
+  getStationsLists() async {
+    if (user == null) {
       print("no user set");
       return;
     }
 
     List<List<dynamic>> stationsFetched = [];
-    print("${this.user?.token} TOKEN");
+    print("${user?.token} TOKEN");
 
-    List<String> endpoints = ["get_favourites", "get_recently_played", "get_check_this_out", "get_favourites"];
+    List<String> endpoints = ["get_favourites", "get_recently_played", "get_check_this_out"];
     for (int i = 0; i < endpoints.length; i++) {
         final response = await http.post(
             Uri.parse('https://radish-app.herokuapp.com/user/${endpoints.elementAt(i)}'),
@@ -51,7 +53,7 @@ class _ListenPageState extends State<ListenPage> {
               'Content-Type': 'application/json; charset=UTF-8',
             },
             body: jsonEncode({
-              'token': this.user?.token
+              'token': user?.token
             })
         );
 
@@ -76,13 +78,41 @@ class _ListenPageState extends State<ListenPage> {
       favStations = stationsFetched[0].map((station) => Station.fromJson(station)).toList();
       recentStations = stationsFetched[1].map((station) => Station.fromJson(station)).toList();
       checkStations = stationsFetched[2].map((station) => Station.fromJson(station)).toList();
-      categoryStations = stationsFetched[3].map((station) => Station.fromJson(station)).toList();
+    });
+  }
+
+  getCategoryList() async {
+   String endpointUrl = "get_katalogi_ziom";
+    final response = await http.get(
+        Uri.parse('https://radish-app.herokuapp.com/radio/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        }
+    );
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    var cataloguesJson = jsonDecode(response.body);
+    // Catalogues? cataloguesJ = cataloguesJson != null ? Catalogues.fromJson(cataloguesJson) : null;
+    // if (cataloguesJ == null) {
+    //   print("couldnt get catalogues from json");
+    //   return;
+    // }
+
+    setState(() {
+      cataloguesStations = Catalogues.fromJson(cataloguesJson);
     });
   }
 
   setupApp() async {
     await getUserData();
-    await getFavStations();
+    await getStationsLists();
+    await getCategoryList();
   }
 
   @override
@@ -117,11 +147,11 @@ class _ListenPageState extends State<ListenPage> {
                         "Listen",
                         style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800),
                       ),
-                      SizedBox(height: 60.0),
+                      const SizedBox(height: 60.0),
                       StationSlider(title: "Your favourites", items: favStations),
                       StationSlider(title: "Recently played", items: recentStations),
                       StationSlider(title: "Check this out", items: checkStations),
-                      StationSlider(title: "Catalogue", items: categoryStations),
+                      CatalogueSlider(catalogue: cataloguesStations),
                     ],
                   ),
                 ),
