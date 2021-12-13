@@ -17,33 +17,39 @@ class CurrentlyPlaying extends StatefulWidget {
 
 class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
   FlutterRadioPlayer _radioPlayer = FlutterRadioPlayer();
-  // late Station station;
+  Station? station;
 
   @override
   void initState() {
     super.initState();
-    initRadioService();
+    if (widget.playerState == false ) initRadioService();
+    else {
+      getStationData();
+    }
   }
 
-  // Future<String> getStationData() async {
-  //   SharedPreferences storage = await SharedPreferences.getInstance();
-  //   var userData = storage.getString('currentlyPlaying');
-  //   Map json = jsonDecode(userData.toString());
-  //   Map<String, dynamic> stringQueryParameters =
-  //   json.map((key, value) => MapEntry(key.toString(), value));
-  //
-  //   setState(() {
-  //     station = Station.fromJson(stringQueryParameters);
-  //   });
-  //   return station.streams!.url!;
-  // }
+  Future<String> getStationData() async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    var userData = storage.getString('currentlyPlaying');
+    Map json = jsonDecode(userData.toString());
+    Map<String, dynamic> stringQueryParameters =
+    json.map((key, value) => MapEntry(key.toString(), value));
+
+    setState(() {
+      station = Station.fromJson(stringQueryParameters);
+    });
+    _radioPlayer.setUrl(station!.streams!.url!, "true");
+    return station!.streams!.url!;
+  }
 
   Future<void> initRadioService() async {
-    // final url = await getStationData();
-    // await Future.delayed(const Duration(seconds: 2));
-    // print(url);
-    // print(station.streams!.url!);
-    String url = "http://ais.absoluteradio.co.uk/absoluteclassicrock.mp3?";
+    String url = await getStationData();
+    await Future.delayed(const Duration(seconds: 2));
+    print(url);
+    print(station!.streams!.url!);
+    url = station!.streams!.url!;
+    print(station!.name!);
+    // String url = "http://ais.absoluteradio.co.uk/absoluteclassicrock.mp3?";
     try {
       await _radioPlayer.init(
         "Flutter Radio Player",
@@ -51,6 +57,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
           url,
         "true"
       );
+      print("Done");
     } on PlatformException {
       print("Exception occurred while trying to register the services.");
     }
@@ -93,8 +100,8 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                       style: TextStyle(color: Colors.grey, fontSize: 14)
                     ),
                     Text(
-                      // station.name ?? "",
-                      "Absolute Radio",
+                      station!.name ?? "",
+                      // "Absolute Radio",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)
                     ),
@@ -113,7 +120,8 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(40),
                         child: Image.network(
-                          'https://i.scdn.co/image/ab67616d00001e029b95ca5babfa8f869f87e026',
+                          station!.cover!,
+                          // 'https://i.scdn.co/image/ab67616d00001e029b95ca5babfa8f869f87e026',
                           fit: BoxFit.fill,
                         ),
                       ),
