@@ -84,7 +84,7 @@ class _ListenPageState extends State<ListenPage> {
   getCategoryList() async {
    String endpointUrl = "get_katalogi_ziom";
     final response = await http.get(
-        Uri.parse('https://radish-scening.herokuapp.com/radio/$endpointUrl'),
+        Uri.parse('https://radish-app.herokuapp.com/radio/$endpointUrl'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         }
