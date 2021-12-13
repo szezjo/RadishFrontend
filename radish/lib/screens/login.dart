@@ -42,7 +42,8 @@ class _LoginPageState extends State<LoginPage> {
 
     print("LOGGED IN");
 
-    Navigator.pushReplacementNamed(context, "/listen");
+    Navigator.pushReplacementNamed(context, "/feed");
+    // Navigator.pushReplacementNamed(context, "/listen");
   }
 
   @override

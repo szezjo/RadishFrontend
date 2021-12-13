@@ -72,6 +72,7 @@ flutter:
     - images/logo_white.png
     - images/headerBg.png
     - images/stationPlaceholder.png
+    - images/avatarPlaceholder.png
     - images/genresCover.png
     - images/countriesCover.png
     - images/decadesCover.png
