@@ -141,12 +141,25 @@ class _StationPageState extends State<StationPage> {
                       borderRadius: BorderRadius.circular(8.0),
                       child: Container(
                         color: Colors.white,
-                        child: FadeInImage.assetNetwork(
-                        placeholder: 'images/stationPlaceholder.png',
-                        image: station.cover ?? "invalid",
-                        height: 90.0,
-                        width: 90.0,
-                        fit: BoxFit.contain
+                        child: station.cover != null ? FadeInImage.assetNetwork(
+                            placeholder: 'images/stationPlaceholder.png',
+                            image: station.cover ?? "invalid",
+                            imageErrorBuilder:
+                                (context, error, stackTrace) {
+                              return Image.asset(
+                                  'images/stationPlaceholder.png',
+                                  height: 90.0,
+                                  width: 90.0,
+                                  fit: BoxFit.contain);
+                            },
+                            height: 90.0,
+                            width: 90.0,
+                            fit: BoxFit.contain
+                        ) : Image.asset(
+                            'images/stationPlaceholder.png',
+                            height: 90.0,
+                            width: 90.0,
+                            fit: BoxFit.contain
                         ),
                       ),
                     ),

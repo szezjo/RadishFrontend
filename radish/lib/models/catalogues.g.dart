@@ -29,8 +29,9 @@ Label _$LabelFromJson(Map<String, dynamic> json) => Label(
       stations: (json['stations'] as List<dynamic>?)
           ?.map((e) => Station.fromJson(e as Map<String, dynamic>))
           .toList(),
-    );
+    )..label = json['label'] as String?;
 
 Map<String, dynamic> _$LabelToJson(Label instance) => <String, dynamic>{
+      'label': instance.label,
       'stations': instance.stations?.map((e) => e.toJson()).toList(),
     };
