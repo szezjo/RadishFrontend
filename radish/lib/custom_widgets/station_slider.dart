@@ -71,9 +71,22 @@ class _StationSliderState extends State<StationSlider> {
                       borderRadius: BorderRadius.circular(8.0),
                       child: Container(
                         color: Colors.white,
-                        child: FadeInImage.assetNetwork(
+                        child: widget.items?.elementAt(index).cover != null ? FadeInImage.assetNetwork(
                             placeholder: 'images/stationPlaceholder.png',
                             image: widget.items?.elementAt(index).cover ?? "invalid",
+                            imageErrorBuilder:
+                                (context, error, stackTrace) {
+                              return Image.asset(
+                                  'images/stationPlaceholder.png',
+                                  height: 90.0,
+                                  width: 90.0,
+                                  fit: BoxFit.contain);
+                            },
+                            height: 90.0,
+                            width: 90.0,
+                            fit: BoxFit.contain
+                        ) : Image.asset(
+                            'images/stationPlaceholder.png',
                             height: 90.0,
                             width: 90.0,
                             fit: BoxFit.contain

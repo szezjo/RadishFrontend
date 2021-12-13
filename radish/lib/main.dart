@@ -8,6 +8,7 @@ import 'package:radish/screens/welcome.dart';
 import 'package:radish/screens/login.dart';
 import 'package:radish/screens/signup.dart';
 import 'package:radish/screens/currently_playing.dart';
+import 'package:radish/screens/catalogue.dart';
 import 'package:radish/theme/theme_config.dart';
 
 void main() {
@@ -40,6 +41,8 @@ class Radish extends StatelessWidget {
           case "/station": {  page = const StationPage(); }
           break;
           case "/player": {  page = const CurrentlyPlaying(); }
+          break;
+          case "/catalogue": {  page = const CataloguePage(); }
           break;
           default: { page = const LoadingPage(); }
           break;
