@@ -74,15 +74,15 @@ class _CataloguePageState extends State<CataloguePage> {
                   style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
               Text(
-                  catalogue!.genres![0].label!,
+                  catalogue.genres![0].label!,
                   style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
               Text(
-                  catalogue!.decades![0].label!,
+                  catalogue.decades![0].label!,
                   style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
               Text(
-                  catalogue!.countries![0].label!,
+                  catalogue.countries![0].label!,
                   style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
       ]

@@ -43,12 +43,16 @@ class _StationPageState extends State<StationPage> {
   }
 
   Future<Color> getImagePalette () async {
-    if (station.cover == null) {
+    try {
+      if (station.cover == null) {
+        return Colors.white;
+      }
+      final PaletteGenerator paletteGenerator = await PaletteGenerator
+            .fromImageProvider(NetworkImage(station.cover!), timeout: const Duration(seconds: 1));
+      return paletteGenerator.dominantColor?.color ?? Colors.white;
+    } catch (err) {
       return Colors.white;
     }
-    final PaletteGenerator paletteGenerator = await PaletteGenerator
-        .fromImageProvider(NetworkImage(station.cover!),);
-    return paletteGenerator.dominantColor?.color ?? Colors.white;
   }
 
   @override

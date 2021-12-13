@@ -18,9 +18,6 @@ class _CatalogueSliderState extends State<CatalogueSlider> {
 
 
   showAll(String catalogueName, Catalogues catalogues) async {
-    print("ROBIMY TO");
-    print(catalogueName);
-    print(catalogues);
       Navigator.pushNamed(context, "/catalogue", arguments: {
         "catalogue": catalogues,
         "catalogueName": catalogueName
