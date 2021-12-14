@@ -1,48 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+import 'package:radish/screens/listen.dart';
+import 'package:radish/screens/currently_playing.dart';
+import 'package:radish/screens/welcome.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-  final String title;
+class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
   }
+
+  Future<bool?> isRadioInit() async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    bool? isInit = storage.getBool('radioInit');
+    return isInit;
+  }
+
+  final List<Widget> _widgetOptions = const <Widget>[
+    ListenPage(),
+    WelcomePage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+      backgroundColor: Colors.black,
+      bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(MdiIcons.radio, color: Colors.grey),
+                label: 'Listen',
+                activeIcon: Icon(MdiIcons.radio, color: Colors.redAccent)),
+            BottomNavigationBarItem(
+                icon: Icon(MdiIcons.accountCircle, color: Colors.grey),
+                label: 'Profile',
+                activeIcon:
+                    Icon(MdiIcons.accountCircle, color: Colors.redAccent))
           ],
-        ),
-      ),
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }),
+      body: _widgetOptions.elementAt(_selectedIndex),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+          onPressed: () {
+            isRadioInit().then((value) {
+              if (value == true) {
+                Navigator.pushNamed(context, "/player");
+              }
+            });
+          },
+          child: Icon(MdiIcons.headphones, color: Colors.white),
+        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
