@@ -136,37 +136,7 @@ class _FeedPageState extends State<FeedPage> {
                       )
                     ],
                   ),
-                  // Positioned( // THE NAME
-                  //     top: 150.0,
-                  //     left: 110.0,
-                  //     child: Row(
-                  //       crossAxisAlignment: CrossAxisAlignment.start,
-                  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //       children: [
-                  //         Text(
-                  //             user?.profile?.display_name ?? "",
-                  //             style: TextStyle(fontSize: 18.0)
-                  //         ),
-                  //         IconButton(
-                  //           onPressed: () => print("following"),
-                  //           icon: Icon(
-                  //             Icons.people_rounded,
-                  //             color: ThemeConfig.darkIcons,
-                  //             size: 24.0,
-                  //           ),
-                  //           ),
-                  //         IconButton(
-                  //           onPressed: () => print("settings"),
-                  //           icon: Icon(
-                  //             Icons.settings_rounded,
-                  //             color: ThemeConfig.darkIcons,
-                  //             size: 24.0,
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  // ),
-                  Positioned( // THE AVATAR
+                  Positioned( // THE AVATAR & NAME & BUTTONS
                     top: 95.0,
                     left: 10.0,
                     width: MediaQuery.of(context).size.width - 20.0,
@@ -196,10 +166,10 @@ class _FeedPageState extends State<FeedPage> {
                         Expanded(
                           flex: 6,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 10.0, bottom: 14.0),
+                            padding: const EdgeInsets.only(left: 10.0, bottom: 8.0),
                             child: Text(
                                 user?.profile?.display_name ?? "",
-                                style: TextStyle(fontSize: 18.0)
+                                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
                             ),
                           ),
                         ),

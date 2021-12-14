@@ -90,7 +90,7 @@ class _SongListPageState extends State<SongListPage> {
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Text(
                             title,
-                            style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
+                            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
                         ),
                       )
                     ],
