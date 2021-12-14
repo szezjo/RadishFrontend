@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:radish/models/user.dart';
 import 'package:radish/theme/theme_config.dart';
-import 'package:radish/models/station.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 class FeedPage extends StatefulWidget {
@@ -16,7 +15,7 @@ class FeedPage extends StatefulWidget {
 
 class _FeedPageState extends State<FeedPage> {
 
-  List<dynamic>? activityLog;
+  List<Log>? activityLog;
   User? user;
 
   goToDiscoveries() async {
@@ -32,6 +31,11 @@ class _FeedPageState extends State<FeedPage> {
         "songs": user?.songs?.recently_played,
       });
   }
+
+  goToFollowing() async {
+    Navigator.pushNamed(context, "/following");
+  }
+
 
   getUserData() async {
     SharedPreferences storage = await SharedPreferences.getInstance();
@@ -59,37 +63,41 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   getActivityFeed() async {
-    if (this.user == null) {
+    if (user == null) {
       print("no user set");
       return;
     }
 
-    // print("${this.user?.token} TOKEN");
-    //
-    // String endpointUrl = "";
-    //
-    // final response = await http.post(
-    //     Uri.parse('https://radish-app.herokuapp.com/user/$endpointUrl'),
-    //     headers: {
-    //       'Content-Type': 'application/json; charset=UTF-8',
-    //     },
-    //     body: jsonEncode({
-    //       'token': this.user?.token
-    //     })
-    // );
-    //
-    // if (response.statusCode != 200) {
-    //   print("${response.statusCode} COULDN'T GET $endpointUrl");
-    //   print("${jsonDecode(response.body)}");
-    //   return;
-    // }
-    //
-    // print("${response.statusCode} GOT $endpointUrl");
-    // var activitiesJson = jsonDecode(response.body);
+    print("${user?.token} TOKEN");
+
+    String endpointUrl = "get_followed_activity_logs";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'token': user?.token
+        })
+    );
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    var activitiesJson = jsonDecode(response.body);
+    List<dynamic>? activitiesJ = activitiesJson != null ? List.from(activitiesJson) : null;
+    if (activitiesJ == null) {
+      print("couldnt get activity logs from json");
+      return;
+    }
 
     setState(() {
-      // activityLog = Log.fromJson(activitiesJson));
-      activityLog = ["1", "2", "3"];
+      activityLog = activitiesJ.map((log) => Log.fromJson(log)).toList();
     });
   }
 
@@ -113,7 +121,7 @@ class _FeedPageState extends State<FeedPage> {
                 children: [
                   Column( // 2 BACKGROUND COVER RECTANGLES
                     children: [
-                      SizedBox(height: 60.0),
+                      const SizedBox(height: 60.0),
                       FutureBuilder<Color>(
                           future: getImagePalette(),
                           builder: (BuildContext context, AsyncSnapshot<Color> snapshot) {
@@ -138,8 +146,8 @@ class _FeedPageState extends State<FeedPage> {
                   ),
                   Positioned( // THE AVATAR & NAME & BUTTONS
                     top: 95.0,
-                    left: 10.0,
-                    width: MediaQuery.of(context).size.width - 20.0,
+                    left: 20.0,
+                    width: MediaQuery.of(context).size.width - 40.0,
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -169,14 +177,14 @@ class _FeedPageState extends State<FeedPage> {
                             padding: const EdgeInsets.only(left: 10.0, bottom: 8.0),
                             child: Text(
                                 user?.profile?.display_name ?? "",
-                                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                                style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
                             ),
                           ),
                         ),
                         Expanded(
                           flex: 1,
                           child: IconButton(
-                            onPressed: () => print("following"),
+                            onPressed: goToFollowing,
                             icon: Icon(
                               Icons.people_rounded,
                               color: ThemeConfig.darkIcons,
@@ -218,7 +226,7 @@ class _FeedPageState extends State<FeedPage> {
                               overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
                               foregroundColor: MaterialStateProperty.all(Colors.white),
                             ),
-                            child: Text("Discoveries"),
+                            child: const Text("Discoveries"),
                             onPressed: goToDiscoveries,
                           ),
                           TextButton(
@@ -233,7 +241,7 @@ class _FeedPageState extends State<FeedPage> {
                               overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
                               foregroundColor: MaterialStateProperty.all(Colors.white),
                             ),
-                            child: Text("Recently played"),
+                            child: const Text("Recently played"),
                             onPressed: goToRecently,
                           ),
                         ],
@@ -242,7 +250,7 @@ class _FeedPageState extends State<FeedPage> {
                 ]
             ),
             Expanded(
-                child: activityList(activityLog)
+                child: activityList(activityLog, user)
             )
           ]
       ),
@@ -250,15 +258,27 @@ class _FeedPageState extends State<FeedPage> {
   }
 }
 
-Widget activityList(List <dynamic>? activityLog) {
+Widget activityList(List <Log>? activityLog, User? user) {
+
+  isLiked(Log log) {
+    if (log.radio != null) {
+      return user!.stations!.favourites!.contains(log.radio!.api_id);
+    } else if (log.song != "" && log.song != null){
+      return user!.songs!.discovered!.contains(log.song);
+    } else {
+      return false;
+    }
+  }
+
+
   return ListView(
     padding: EdgeInsets.zero,
     scrollDirection: Axis.vertical,
     children: List.generate(activityLog?.length ?? 0, (int index) {
       return GestureDetector(
-        onDoubleTap: () => print("liked ${activityLog?.elementAt(index)}"),
+        onDoubleTap: () => print("really liked ${activityLog!.elementAt(index).song}"),
+        onTap: () => print("listen to ${activityLog!.elementAt(index).radio!.name}"),
         child: Container(
-          height: 60.0,
           decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -266,41 +286,74 @@ Widget activityList(List <dynamic>? activityLog) {
                 ),)
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                flex: 1,
-                child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Icon(
-                      Icons.music_note_rounded,
-                      color: ThemeConfig.darkAccentPrimary,
-                      size: 28.0,
-                    )
-                ),
-              ),
-              Expanded(
-                flex: 6,
-                child: Text(
-                  activityLog?.elementAt(index) ?? "",
-                  style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      color: ThemeConfig.darkIcons,
-                      fontSize: 18.0),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: IconButton(
-                  onPressed: () => print("faved ${activityLog?.elementAt(index)}"),
-                  icon: Icon(
-                    Icons.favorite_outline_rounded,
-                    color: ThemeConfig.darkIcons,
-                    size: 24.0,
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Container(
+                    color: Colors.white,
+                    child: activityLog?.elementAt(index).avatar != null ? FadeInImage.assetNetwork(
+                        placeholder: 'images/avatarPlaceholder.png',
+                        image: activityLog?.elementAt(index).avatar ?? "invalid",
+                        imageErrorBuilder:
+                            (context, error, stackTrace) {
+                          return Image.asset(
+                              'images/avatarPlaceholder.png',
+                              height: 70.0,
+                              width: 70.0,
+                              fit: BoxFit.contain);
+                        },
+                        height: 70.0,
+                        width: 70.0,
+                        fit: BoxFit.contain
+                    ) : Image.asset(
+                        'images/avatarPlaceholder.png',
+                        height: 70.0,
+                        width: 70.0,
+                        fit: BoxFit.contain
+                    ),
                   ),
                 ),
-              )
+              ),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:[
+                      Text(
+                        activityLog!.elementAt(index).username ?? "",
+                        style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            color: ThemeConfig.darkAccentPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0),
+                      ),
+                      Text(
+                          activityLog.elementAt(index).did ?? ""),
+                      Text(
+                        activityLog.elementAt(index).song ?? (activityLog.elementAt(index).radio?.name ?? ""),
+                        style: TextStyle(
+                          color: ThemeConfig.darkIcons,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ]
+                ),
+              ),
+              IconButton(
+                onPressed: () => print(activityLog.elementAt(index).did),
+                icon: isLiked(activityLog.elementAt(index)) ?
+                Icon(
+                  Icons.favorite_rounded,
+                  color: ThemeConfig.darkAccentPrimary,
+                  size: 24.0,
+                ) :
+                Icon(
+                  Icons.favorite_outline_rounded,
+                  color: ThemeConfig.darkIcons,
+                  size: 24.0,
+                ),
+              ),
             ],
           ),
         ),

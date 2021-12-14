@@ -73,7 +73,7 @@ class _StationPageState extends State<StationPage> {
                 children: [
                   Column(
                     children: [
-                      SizedBox(height: 60.0),
+                      const SizedBox(height: 60.0),
                       FutureBuilder<Color>(
                           future: getImagePalette(),
                           builder: (BuildContext context, AsyncSnapshot<Color> snapshot) {
@@ -126,7 +126,7 @@ class _StationPageState extends State<StationPage> {
                         children: [
                           Text(
                               station.status?.currently_playing_song ?? "",
-                          style: TextStyle(fontSize: 12.0)),
+                          style: const TextStyle(fontSize: 12.0)),
                           Text(
                             station.status?.currently_playing_song ?? "",
                             style: TextStyle(
@@ -295,7 +295,7 @@ Widget stationInfo(Station station) {
 
 Widget infoItem(String title, String? subtitle) {
 
-  TextStyle SubtitleTextStyle = TextStyle(
+  TextStyle subtitleTextStyle = TextStyle(
     fontSize: 11.0,
     color: ThemeConfig.darkIcons,
   );
@@ -316,11 +316,11 @@ Widget infoItem(String title, String? subtitle) {
         children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18.0, color: Colors.white)
+              style: const TextStyle(fontSize: 18.0, color: Colors.white)
             ),
             Text(
               subtitle ?? "",
-              style: SubtitleTextStyle
+              style: subtitleTextStyle
           ),
         ],
       ),

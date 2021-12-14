@@ -5,7 +5,6 @@ import 'package:radish/theme/theme_config.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:radish/models/user.dart';
-import 'package:radish/custom_widgets/station_slider.dart';
 
 class StationListPage extends StatefulWidget {
 
@@ -57,14 +56,14 @@ class _StationListPageState extends State<StationListPage> {
     return Scaffold(
         body: Column(
             children: [
-              SizedBox(height: 60.0),
+              const SizedBox(height: 60.0),
               Container(
                 height: 80.0,
                 color: ThemeConfig.darkBGSecondary,
                 child: Center(
                   child: Text(
                       category,
-                      style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
+                      style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
                   ),
                 ),
               ),
@@ -130,7 +129,7 @@ class _StationListPageState extends State<StationListPage> {
                               ]
                             ),
                           ),
-                          SizedBox(width: 20.0)
+                          const SizedBox(width: 20.0)
                         ],
                       ),
                     );

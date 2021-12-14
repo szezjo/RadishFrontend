@@ -61,12 +61,12 @@ class _SongListPageState extends State<SongListPage> {
     return Scaffold(
         body: Column(
             children: [
-              SizedBox(height: 60.0),
+              const SizedBox(height: 60.0),
               Container(
                 height: 80.0,
                 color: ThemeConfig.darkBGSecondary,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Row(
                     children: [
                       ClipRRect(
@@ -90,7 +90,7 @@ class _SongListPageState extends State<SongListPage> {
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Text(
                             title,
-                            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                            style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
                         ),
                       )
                     ],

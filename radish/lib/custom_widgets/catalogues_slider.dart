@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:radish/models/catalogues.dart';
-import 'package:radish/models/station.dart';
 import 'package:radish/theme/theme_config.dart';
 
 class CatalogueSlider extends StatefulWidget {

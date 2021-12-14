@@ -6,7 +6,6 @@ import 'package:radish/theme/theme_config.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:radish/models/user.dart';
-import 'package:radish/custom_widgets/station_slider.dart';
 
 class CataloguePage extends StatefulWidget {
 
@@ -58,7 +57,7 @@ class _CataloguePageState extends State<CataloguePage> {
     return Scaffold(
         body: Column(
             children: [
-              SizedBox(height: 60.0),
+              const SizedBox(height: 60.0),
               Container(
                 height: 80.0,
                 color: ThemeConfig.darkBGSecondary,
@@ -71,19 +70,19 @@ class _CataloguePageState extends State<CataloguePage> {
               ),
               Text(
                   catalogueName,
-                  style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
+                  style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
               Text(
                   catalogue.genres![0].label!,
-                  style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
+                  style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
               Text(
                   catalogue.decades![0].label!,
-                  style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
+                  style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
               Text(
                   catalogue.countries![0].label!,
-                  style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
+                  style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)
               ),
       ]
         ),
