@@ -45,7 +45,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     print("LOGGED IN");
 
-    Navigator.pushReplacementNamed(context, "/listen");
+    Navigator.pushReplacementNamed(context, "/home");
 
   }
 
