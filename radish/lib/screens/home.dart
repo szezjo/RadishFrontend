@@ -4,6 +4,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:radish/screens/listen.dart';
 import 'package:radish/screens/currently_playing.dart';
 import 'package:radish/screens/welcome.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -14,6 +15,17 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<bool?> isRadioInit() async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    bool? isInit = storage.getBool('radioInit');
+    return isInit;
+  }
 
   final List<Widget> _widgetOptions = const <Widget>[
     ListenPage(),
@@ -36,7 +48,8 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
                 icon: Icon(MdiIcons.accountCircle, color: Colors.grey),
                 label: 'Profile',
-                activeIcon: Icon(MdiIcons.accountCircle, color: Colors.redAccent))
+                activeIcon:
+                    Icon(MdiIcons.accountCircle, color: Colors.redAccent))
           ],
           onTap: (index) {
             setState(() {
@@ -45,11 +58,15 @@ class _MainScreenState extends State<MainScreen> {
           }),
       body: _widgetOptions.elementAt(_selectedIndex),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, "/player");
-        },
-        child: Icon(Icons.add, color: Colors.white),
-      ),
+          onPressed: () {
+            isRadioInit().then((value) {
+              if (value == true) {
+                Navigator.pushNamed(context, "/player");
+              }
+            });
+          },
+          child: Icon(MdiIcons.headphones, color: Colors.white),
+        ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }

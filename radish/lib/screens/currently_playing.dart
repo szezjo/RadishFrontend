@@ -178,7 +178,9 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                   print('title' + title);
                                   if (_oldTitle != '' && title == '') {
                                     title = _oldTitle;
-                                  } else if (title != '') {
+                                  }
+                                  if (title != '') {
+                                    print('set new title');
                                     setCurrentTitle(title);
                                   }
                                   return Text(title,
