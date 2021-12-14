@@ -136,28 +136,34 @@ class _ListenPageState extends State<ListenPage> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 100.0),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        "Listen",
-                        style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800),
+            SingleChildScrollView(
+              child: Stack(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 100.0),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Listen",
+                              style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 60.0),
+                            StationSlider(title: "Your favourites", items: favStations),
+                            StationSlider(title: "Recently played", items: recentStations),
+                            StationSlider(title: "Check this out", items: checkStations),
+                            CatalogueSlider(catalogue: cataloguesStations),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 60.0),
-                      StationSlider(title: "Your favourites", items: favStations),
-                      StationSlider(title: "Recently played", items: recentStations),
-                      StationSlider(title: "Check this out", items: checkStations),
-                      CatalogueSlider(catalogue: cataloguesStations),
                     ],
                   ),
                 ),
               ),
-            )
-          ],
+            ),
+          ]
         )
     );
    }
