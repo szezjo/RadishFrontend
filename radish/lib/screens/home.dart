@@ -3,7 +3,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 
 import 'package:radish/screens/listen.dart';
 import 'package:radish/screens/currently_playing.dart';
-import 'package:radish/screens/welcome.dart';
+import 'package:radish/screens/feed.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
@@ -29,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _widgetOptions = const <Widget>[
     ListenPage(),
-    WelcomePage(),
+    FeedPage(),
   ];
 
   @override

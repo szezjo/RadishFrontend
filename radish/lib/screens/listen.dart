@@ -98,11 +98,6 @@ class _ListenPageState extends State<ListenPage> {
 
     print("${response.statusCode} GOT $endpointUrl");
     var cataloguesJson = jsonDecode(response.body);
-    // Catalogues? cataloguesJ = cataloguesJson != null ? Catalogues.fromJson(cataloguesJson) : null;
-    // if (cataloguesJ == null) {
-    //   print("couldnt get catalogues from json");
-    //   return;
-    // }
 
     setState(() {
       cataloguesStations = Catalogues.fromJson(cataloguesJson);

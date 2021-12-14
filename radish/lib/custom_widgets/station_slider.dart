@@ -44,7 +44,7 @@ class _StationSliderState extends State<StationSlider> {
             children: [
               Text(
                   widget.title,
-                style: TextStyle(fontSize: 18.0)
+                style: const TextStyle(fontSize: 18.0)
               ),
               GestureDetector(
                 onTap: () => showAll(),
