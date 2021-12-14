@@ -158,9 +158,9 @@ class _ListenPageState extends State<ListenPage> {
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ]
