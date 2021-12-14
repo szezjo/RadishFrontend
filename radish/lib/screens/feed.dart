@@ -19,6 +19,20 @@ class _FeedPageState extends State<FeedPage> {
   List<dynamic>? activityLog;
   User? user;
 
+  goToDiscoveries() async {
+      Navigator.pushNamed(context, "/discoveries", arguments: {
+        "title": "Discoveries",
+        "songs": user?.songs?.discovered,
+      });
+  }
+
+  goToRecently() async {
+      Navigator.pushNamed(context, "/recently", arguments: {
+        "title": "Recently played",
+        "songs": user?.songs?.recently_played,
+      });
+  }
+
   getUserData() async {
     SharedPreferences storage = await SharedPreferences.getInstance();
     var userData = storage.getString('userData');
@@ -32,14 +46,17 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Future<Color> getImagePalette () async {
-    if (user?.profile?.avatar == null) {
+    try {
+      if (user?.profile?.avatar == null) {
+        return Colors.white;
+      }
+      final PaletteGenerator paletteGenerator = await PaletteGenerator
+          .fromImageProvider(NetworkImage(user!.profile!.avatar!), timeout: const Duration(seconds: 1));
+      return paletteGenerator.dominantColor?.color ?? Colors.white;
+    } catch (err) {
       return Colors.white;
     }
-    final PaletteGenerator paletteGenerator = await PaletteGenerator
-        .fromImageProvider(NetworkImage(user!.profile!.avatar!),);
-    return paletteGenerator.dominantColor?.color ?? Colors.white;
   }
-
 
   getActivityFeed() async {
     if (this.user == null) {
@@ -47,13 +64,12 @@ class _FeedPageState extends State<FeedPage> {
       return;
     }
 
-    List<dynamic> activitiesFetched = [];
     // print("${this.user?.token} TOKEN");
     //
     // String endpointUrl = "";
     //
     // final response = await http.post(
-    //     Uri.parse('https://radish-app.herokuapp.com/user/${endpointUrl}'),
+    //     Uri.parse('https://radish-app.herokuapp.com/user/$endpointUrl'),
     //     headers: {
     //       'Content-Type': 'application/json; charset=UTF-8',
     //     },
@@ -63,21 +79,16 @@ class _FeedPageState extends State<FeedPage> {
     // );
     //
     // if (response.statusCode != 200) {
-    //   print("${response.statusCode} COULDN'T GET ${endpointUrl}");
+    //   print("${response.statusCode} COULDN'T GET $endpointUrl");
     //   print("${jsonDecode(response.body)}");
     //   return;
     // }
     //
-    // print("${response.statusCode} GOT ${endpointUrl}");
+    // print("${response.statusCode} GOT $endpointUrl");
     // var activitiesJson = jsonDecode(response.body);
-    // List<dynamic>? activitiesJ = activitiesJson != null ? List.from(activitiesJson) : null;
-    // if (activitiesJ == null) {
-    //   print("couldnt get activities from json");
-    //   return;
-    // }
 
     setState(() {
-      // activityLog = activitiesJ.map((log) => Log.fromJson(log)).toList();
+      // activityLog = Log.fromJson(activitiesJson));
       activityLog = ["1", "2", "3"];
     });
   }
@@ -100,7 +111,7 @@ class _FeedPageState extends State<FeedPage> {
           children: [
             Stack(
                 children: [
-                  Column(
+                  Column( // 2 BACKGROUND COVER RECTANGLES
                     children: [
                       SizedBox(height: 60.0),
                       FutureBuilder<Color>(
@@ -120,74 +131,145 @@ class _FeedPageState extends State<FeedPage> {
                             }
                           }),
                       Container(
-                        height: 60.0,
+                        height: 150.0,
                         color: ThemeConfig.darkBGSecondary,
                       )
                     ],
                   ),
-                  Positioned(
-                      top: 150.0,
-                      left: 110.0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              user?.profile?.display_name ?? "",
-                              style: TextStyle(fontSize: 18.0)),
-                        ],
-                      )
-                  ),
-                  Positioned(
+                  // Positioned( // THE NAME
+                  //     top: 150.0,
+                  //     left: 110.0,
+                  //     child: Row(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //       children: [
+                  //         Text(
+                  //             user?.profile?.display_name ?? "",
+                  //             style: TextStyle(fontSize: 18.0)
+                  //         ),
+                  //         IconButton(
+                  //           onPressed: () => print("following"),
+                  //           icon: Icon(
+                  //             Icons.people_rounded,
+                  //             color: ThemeConfig.darkIcons,
+                  //             size: 24.0,
+                  //           ),
+                  //           ),
+                  //         IconButton(
+                  //           onPressed: () => print("settings"),
+                  //           icon: Icon(
+                  //             Icons.settings_rounded,
+                  //             color: ThemeConfig.darkIcons,
+                  //             size: 24.0,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  // ),
+                  Positioned( // THE AVATAR
                     top: 95.0,
                     left: 10.0,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Container(
-                        color: Colors.white,
-                        child: user?.profile?.avatar != null ? FadeInImage.assetNetwork(
-                            placeholder: 'images/avatarPlaceholder.png',
-                            image: user!.profile!.avatar!,
-                            height: 90.0,
-                            width: 90.0,
-                            fit: BoxFit.contain
-                        ) : Image.asset(
-                            'images/avatarPlaceholder.png',
-                            height: 90.0,
-                            width: 90.0,
-                            fit: BoxFit.contain
+                    width: MediaQuery.of(context).size.width - 20.0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Container(
+                            color: Colors.white,
+                            child: user?.profile?.avatar != null ? FadeInImage.assetNetwork(
+                                placeholder: 'images/avatarPlaceholder.png',
+                                image: user!.profile!.avatar!,
+                                height: 90.0,
+                                width: 90.0,
+                                fit: BoxFit.contain
+                            ) : Image.asset(
+                                'images/avatarPlaceholder.png',
+                                height: 90.0,
+                                width: 90.0,
+                                fit: BoxFit.contain
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          flex: 6,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 10.0, bottom: 14.0),
+                            child: Text(
+                                user?.profile?.display_name ?? "",
+                                style: TextStyle(fontSize: 18.0)
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: IconButton(
+                            onPressed: () => print("following"),
+                            icon: Icon(
+                              Icons.people_rounded,
+                              color: ThemeConfig.darkIcons,
+                              size: 24.0,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: IconButton(
+                            onPressed: () => print("settings"),
+                            icon: Icon(
+                              Icons.settings_rounded,
+                              color: ThemeConfig.darkIcons,
+                              size: 24.0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  )
-                ]
-            ),
-            Container(
-              height: 90.0,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                              "Quality",
-                              style: TextStyle(fontSize: 18.0)),
+                  ),
+                  Positioned(
+                    width: MediaQuery.of(context).size.width,
+                    bottom: 30.0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50.0),
+                                      side: BorderSide(color: ThemeConfig.darkAccentPrimary, width: 3.0)
+                                  )
+                              ),
+                              fixedSize: MaterialStateProperty.all(const Size.fromWidth(140)),
+                              overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
+                              foregroundColor: MaterialStateProperty.all(Colors.white),
+                            ),
+                            child: Text("Discoveries"),
+                            onPressed: goToDiscoveries,
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50.0),
+                                      side: BorderSide(color: ThemeConfig.darkAccentPrimary, width: 3.0)
+                                  )
+                              ),
+                              fixedSize: MaterialStateProperty.all(const Size.fromWidth(140)),
+                              overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
+                              foregroundColor: MaterialStateProperty.all(Colors.white),
+                            ),
+                            child: Text("Recently played"),
+                            onPressed: goToRecently,
+                          ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              decoration: BoxDecoration(
-                  color: ThemeConfig.darkBGSecondary,
-                  border: Border.symmetric(horizontal: BorderSide(
-                    color: ThemeConfig.darkDivider,
-                  ),)
-              ),
+                    ),)
+                ]
             ),
             Expanded(
                 child: activityList(activityLog)

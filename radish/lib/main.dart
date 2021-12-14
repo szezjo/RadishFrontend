@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:radish/screens/following.dart';
 import 'package:radish/screens/home.dart';
 import 'package:radish/screens/listen.dart';
 import 'package:radish/screens/loading.dart';
+import 'package:radish/screens/song_list.dart';
 import 'package:radish/screens/station.dart';
 import 'package:radish/screens/station_list.dart';
 import 'package:radish/screens/welcome.dart';
@@ -46,6 +48,12 @@ class Radish extends StatelessWidget {
           case "/catalogue": {  page = const CataloguePage(); }
           break;
           case "/feed": {  page = const FeedPage(); }
+          break;
+          case "/recently": {  page = const SongListPage(); }
+          break;
+          case "/discoveries": {  page = const SongListPage(); }
+          break;
+          case "/following": {  page = const FollowingPage(); }
           break;
           default: { page = const LoadingPage(); }
           break;

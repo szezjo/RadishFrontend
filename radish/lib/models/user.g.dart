@@ -11,10 +11,10 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
           ? null
           : Profile.fromJson(json['profile'] as Map<String, dynamic>),
       following: (json['following'] as List<dynamic>?)
-          ?.map((e) => e as String)
+          ?.map((e) => e as String?)
           .toList(),
       followers: (json['followers'] as List<dynamic>?)
-          ?.map((e) => e as String)
+          ?.map((e) => e as String?)
           .toList(),
       status: json['status'] == null
           ? null
@@ -29,7 +29,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
           ? null
           : StationsStat.fromJson(json['stations'] as Map<String, dynamic>),
       token: json['token'] as String,
-    );
+    )..activity = (json['activity'] as List<dynamic>?)
+        ?.map((e) => Log.fromJson(e as Map<String, dynamic>))
+        .toList();
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'profile': instance.profile?.toJson(),
@@ -39,6 +41,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'settings': instance.settings?.toJson(),
       'songs': instance.songs?.toJson(),
       'stations': instance.stations?.toJson(),
+      'activity': instance.activity?.map((e) => e.toJson()).toList(),
       'token': instance.token,
     };
 
@@ -52,6 +55,26 @@ Map<String, dynamic> _$QualitySettingsToJson(QualitySettings instance) =>
     <String, dynamic>{
       'preffered_bitrate': instance.preffered_bitrate,
       'download_covers': instance.download_covers,
+    };
+
+Log _$LogFromJson(Map<String, dynamic> json) => Log(
+      username: json['username'] as String?,
+      avatar: json['avatar'] as String?,
+      timestamp: json['timestamp'] as String?,
+      did: json['did'] as String?,
+      radio: json['radio'] == null
+          ? null
+          : Station.fromJson(json['radio'] as Map<String, dynamic>),
+      song: json['song'] as String?,
+    );
+
+Map<String, dynamic> _$LogToJson(Log instance) => <String, dynamic>{
+      'username': instance.username,
+      'avatar': instance.avatar,
+      'timestamp': instance.timestamp,
+      'did': instance.did,
+      'radio': instance.radio?.toJson(),
+      'song': instance.song,
     };
 
 Quality _$QualityFromJson(Map<String, dynamic> json) => Quality(
@@ -122,15 +145,13 @@ Map<String, dynamic> _$SongToJson(Song instance) => <String, dynamic>{
     };
 
 Status _$StatusFromJson(Map<String, dynamic> json) => Status(
-      online: json['online'] as bool?,
-      currently_playing: json['currently_playing'] == null
-          ? null
-          : Song.fromJson(json['currently_playing'] as Map<String, dynamic>),
+      last_seen: json['last_seen'] as String?,
+      currently_playing: json['currently_playing'] as String?,
     );
 
 Map<String, dynamic> _$StatusToJson(Status instance) => <String, dynamic>{
-      'online': instance.online,
-      'currently_playing': instance.currently_playing?.toJson(),
+      'last_seen': instance.last_seen,
+      'currently_playing': instance.currently_playing,
     };
 
 SongsStat _$SongsStatFromJson(Map<String, dynamic> json) => SongsStat(
@@ -165,7 +186,6 @@ Map<String, dynamic> _$StationsStatToJson(StationsStat instance) =>
 Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
       username: json['username'] as String?,
       avatar: json['avatar'] as String?,
-      password_hash: json['password_hash'] as String?,
       display_name: json['display_name'] as String?,
       email_address: json['email_address'] as String?,
     );
@@ -173,7 +193,6 @@ Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
 Map<String, dynamic> _$ProfileToJson(Profile instance) => <String, dynamic>{
       'username': instance.username,
       'avatar': instance.avatar,
-      'password_hash': instance.password_hash,
       'display_name': instance.display_name,
       'email_address': instance.email_address,
     };

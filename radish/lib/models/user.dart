@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:radish/models/station.dart';
 
 part 'user.g.dart';
 
@@ -6,12 +7,13 @@ part 'user.g.dart';
 class User {
 
   Profile? profile;
-  List<String>? following;
-  List<String>? followers;
+  List<String?>? following;
+  List<String?>? followers;
   Status? status;
   Settings? settings;
   SongsStat? songs;
   StationsStat? stations;
+  List<Log>? activity;
   String token;
 
 
@@ -32,6 +34,22 @@ class QualitySettings {
 
   factory QualitySettings.fromJson(Map<String, dynamic> json) => _$QualitySettingsFromJson(json);
   Map<String, dynamic> toJson() => _$QualitySettingsToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class Log {
+  String? username;
+  String? avatar;
+  String? timestamp;
+  String? did;
+  Station? radio;
+  String? song;
+
+  Log({required this.username, required this.avatar, required this.timestamp,
+    required this.did, required this.radio, required this.song});
+
+  factory Log.fromJson(Map<String, dynamic> json) => _$LogFromJson(json);
+  Map<String, dynamic> toJson() => _$LogToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -101,10 +119,10 @@ class Song {
 
 @JsonSerializable(explicitToJson: true)
 class Status {
-  bool? online;
-  Song? currently_playing;
+  String? last_seen;
+  String? currently_playing;
 
-  Status({required this.online, required this.currently_playing});
+  Status({required this.last_seen, required this.currently_playing});
 
   factory Status.fromJson(Map<String, dynamic> json) => _$StatusFromJson(json);
   Map<String, dynamic> toJson() => _$StatusToJson(this);
@@ -136,12 +154,10 @@ class StationsStat {
 class Profile {
   String? username;
   String? avatar;
-  String? password_hash;
   String? display_name;
   String? email_address;
 
-  Profile({required this.username, required this.avatar, required this.password_hash, required this.display_name,
-  required this.email_address});
+  Profile({required this.username, required this.avatar, required this.display_name, required this.email_address});
 
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
   Map<String, dynamic> toJson() => _$ProfileToJson(this);
