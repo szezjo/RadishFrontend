@@ -14,8 +14,17 @@ import 'package:radish/screens/catalogue.dart';
 import 'package:radish/screens/feed.dart';
 import 'package:radish/theme/theme_config.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 void main() {
   runApp(const Radish());
+  init();
+}
+
+Future<void> init() async {
+  SharedPreferences storage = await SharedPreferences.getInstance();
+  storage.setBool('radioInit', false);
+  storage.setString('currentUrl', '');
 }
 
 class Radish extends StatelessWidget {
@@ -35,7 +44,7 @@ class Radish extends StatelessWidget {
           break;
           case "/signup": {  page = const SignUpPage(); }
           break;
-          case "/home": {  page = const MyHomePage(title: 'Home Page'); }
+          case "/home": {  page = const MainScreen(); }
           break;
           case "/listen": {  page = const ListenPage(); }
           break;
@@ -59,13 +68,14 @@ class Radish extends StatelessWidget {
           break;
         }
         return PageRouteBuilder(
-            settings: settings, // Pass this to make popUntil(), pushNamedAndRemoveUntil(), works
-            pageBuilder: (c, a1, a2) => page,
-            transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-            transitionDuration: const Duration(milliseconds: 500),
+          settings:
+              settings, // Pass this to make popUntil(), pushNamedAndRemoveUntil(), works
+          pageBuilder: (c, a1, a2) => page,
+          transitionsBuilder: (c, anim, a2, child) =>
+              FadeTransition(opacity: anim, child: child),
+          transitionDuration: const Duration(milliseconds: 500),
         );
       },
     );
   }
 }
-

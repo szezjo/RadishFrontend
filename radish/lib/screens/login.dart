@@ -42,8 +42,8 @@ class _LoginPageState extends State<LoginPage> {
 
     print("LOGGED IN");
 
-    Navigator.pushReplacementNamed(context, "/feed");
-    // Navigator.pushReplacementNamed(context, "/listen");
+    //Navigator.pushReplacementNamed(context, "/listen");
+    Navigator.pushReplacementNamed(context, "/home");
   }
 
   @override
@@ -55,9 +55,7 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage("images/bg_login.png"),
-                    fit: BoxFit.fill
-                ),
+                    image: AssetImage("images/bg_login.png"), fit: BoxFit.fill),
               ),
             ),
             Padding(
@@ -71,59 +69,59 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 50.0),
                     FractionallySizedBox(
-                      widthFactor: 0.8,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Email",
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          const SizedBox(height: 20.0),
-                          TextField(
-                            controller: emailController,
-                            decoration: kInputDecoration,
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                          const SizedBox(height: 20.0),
-                          const Text(
-                            "Password",
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          const SizedBox(height: 20.0),
-                          TextField(
-                            obscureText: true,
-                            controller: passwordController,
-                            decoration: kInputDecoration,
-                          ),
-                        ],
-                      )
-                    ),
+                        widthFactor: 0.8,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Email",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            const SizedBox(height: 20.0),
+                            TextField(
+                              controller: emailController,
+                              decoration: kInputDecoration,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 20.0),
+                            const Text(
+                              "Password",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            const SizedBox(height: 20.0),
+                            TextField(
+                              obscureText: true,
+                              controller: passwordController,
+                              decoration: kInputDecoration,
+                            ),
+                          ],
+                        )),
                     const SizedBox(height: 20.0),
                     TextButton(
-                      style: ButtonStyle(
-                        overlayColor: MaterialStateProperty.all(Colors.redAccent),
-                        foregroundColor: MaterialStateProperty.all(Colors.black),
-                        backgroundColor: MaterialStateProperty.all(Colors.white),
-                      ),
-                      child: const Text("Sign in"),
-                      onPressed: handleClick
-                    ),
+                        style: ButtonStyle(
+                          overlayColor:
+                              MaterialStateProperty.all(Colors.redAccent),
+                          foregroundColor:
+                              MaterialStateProperty.all(Colors.black),
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.white),
+                        ),
+                        child: const Text("Sign in"),
+                        onPressed: handleClick),
                   ],
                 ),
               ),
             )
           ],
-        )
-    );
+        ));
   }
 
   final kInputDecoration = InputDecoration(
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        )
-    );
-
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ));
 }
