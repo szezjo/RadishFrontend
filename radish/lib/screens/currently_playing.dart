@@ -16,7 +16,8 @@ class CurrentlyPlaying extends StatefulWidget {
 
 class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
   FlutterRadioPlayer _radioPlayer = FlutterRadioPlayer();
-  var _playerState = FlutterRadioPlayer.flutter_radio_stopped;
+  var _playerState = FlutterRadioPlayer.flutter_radio_playing;
+  var _oldTitle = '';
   Station? station;
 
   @override
@@ -53,6 +54,12 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
     storage.setString('currentUrl', url);
   }
 
+  Future<void> setCurrentTitle(String title) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    storage.setString('oldTitle', title);
+    _oldTitle = title;
+  }
+
   Future<String> setUrlFromData() async {
     String url = await getStationData();
     String oldUrl = await getCurrentUrl();
@@ -62,7 +69,11 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
       _radioPlayer.setUrl(url, "true");
       await setCurrentUrl(url);
     } else {
+      print("Player State Here Lol: " + _playerState);
       _playerState = FlutterRadioPlayer.flutter_radio_playing;
+      print("Player State After Lol: " + _playerState);
+      SharedPreferences storage = await SharedPreferences.getInstance();
+      _oldTitle = storage.getString('oldTitle').toString();
     }
     return url;
   }
@@ -84,6 +95,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
         await _radioPlayer.init("Radish", "Live", url, "true");
         SharedPreferences storage = await SharedPreferences.getInstance();
         storage.setBool('radioInit', true);
+        storage.setString('oldTitle', '');
         await setCurrentUrl(url);
         print("Done");
       } on PlatformException {
@@ -125,7 +137,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.grey, fontSize: 14)),
-                            Text(station!.name ?? "",
+                            Text(station?.name ?? "",
                                 // "Absolute Radio",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -146,8 +158,9 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                 60, 0, 60, 0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(40),
-                              child: Image.network(
-                                station!.cover!,
+                              child: FadeInImage.assetNetwork(
+                                image: station?.cover ?? "",
+                                placeholder: 'images/stationPlaceholder.png',
                                 // 'https://i.scdn.co/image/ab67616d00001e029b95ca5babfa8f869f87e026',
                                 fit: BoxFit.fill,
                               ),
@@ -163,12 +176,17 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                   var title = getTitle(
                                       metadataSnapshot.data.toString());
                                   print('title' + title);
+                                  if (_oldTitle != '' && title == '') {
+                                    title = _oldTitle;
+                                  } else if (title != '') {
+                                    setCurrentTitle(title);
+                                  }
                                   return Text(title,
                                       style: const TextStyle(fontSize: 18));
                                 },
                               ),
                               StreamBuilder(
-                                  initialData: getPlayerState(),
+                                  initialData: _playerState,
                                   stream: _radioPlayer.isPlayingStream,
                                   builder: (context, snapshot) {
                                     if (snapshot.data ==
@@ -227,8 +245,8 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             StreamBuilder(
+                              initialData: _playerState,
                               stream: _radioPlayer.isPlayingStream,
-                              initialData: getPlayerState(),
                               builder: (context, snapshot) {
                                 if (snapshot.data ==
                                     FlutterRadioPlayer.flutter_radio_playing) {
