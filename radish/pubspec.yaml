@@ -73,6 +73,9 @@ flutter:
     - images/logo_white.png
     - images/headerBg.png
     - images/stationPlaceholder.png
+    - images/genresCover.png
+    - images/countriesCover.png
+    - images/decadesCover.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

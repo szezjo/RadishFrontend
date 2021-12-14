@@ -43,12 +43,16 @@ class _StationPageState extends State<StationPage> {
   }
 
   Future<Color> getImagePalette () async {
-    if (station.cover == null) {
+    try {
+      if (station.cover == null) {
+        return Colors.white;
+      }
+      final PaletteGenerator paletteGenerator = await PaletteGenerator
+            .fromImageProvider(NetworkImage(station.cover!), timeout: const Duration(seconds: 1));
+      return paletteGenerator.dominantColor?.color ?? Colors.white;
+    } catch (err) {
       return Colors.white;
     }
-    final PaletteGenerator paletteGenerator = await PaletteGenerator
-        .fromImageProvider(NetworkImage(station.cover!),);
-    return paletteGenerator.dominantColor?.color ?? Colors.white;
   }
 
   @override
@@ -141,12 +145,25 @@ class _StationPageState extends State<StationPage> {
                       borderRadius: BorderRadius.circular(8.0),
                       child: Container(
                         color: Colors.white,
-                        child: FadeInImage.assetNetwork(
-                        placeholder: 'images/stationPlaceholder.png',
-                        image: station.cover ?? "invalid",
-                        height: 90.0,
-                        width: 90.0,
-                        fit: BoxFit.contain
+                        child: station.cover != null ? FadeInImage.assetNetwork(
+                            placeholder: 'images/stationPlaceholder.png',
+                            image: station.cover ?? "invalid",
+                            imageErrorBuilder:
+                                (context, error, stackTrace) {
+                              return Image.asset(
+                                  'images/stationPlaceholder.png',
+                                  height: 90.0,
+                                  width: 90.0,
+                                  fit: BoxFit.contain);
+                            },
+                            height: 90.0,
+                            width: 90.0,
+                            fit: BoxFit.contain
+                        ) : Image.asset(
+                            'images/stationPlaceholder.png',
+                            height: 90.0,
+                            width: 90.0,
+                            fit: BoxFit.contain
                         ),
                       ),
                     ),
