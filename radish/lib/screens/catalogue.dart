@@ -42,6 +42,14 @@ class _CataloguePageState extends State<CataloguePage> {
     });
   }
 
+  showStation(Station? station) async {
+    if (station != null) {
+      Navigator.pushNamed(context, "/station", arguments: {
+        "station": station,
+      });
+    }
+  }
+
   Widget _child = SizedBox(height: 60.0);
 
   @override
@@ -60,6 +68,7 @@ class _CataloguePageState extends State<CataloguePage> {
 
   setChild() {
     setState(() {
+      searching = false;
       _child = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -78,17 +87,6 @@ class _CataloguePageState extends State<CataloguePage> {
                   onPressed: () => showSearchBar(),
                   icon: Icon(
                     Icons.search_rounded,
-                    color: ThemeConfig.darkIcons,
-                    size: 24.0,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: IconButton(
-                  onPressed: () => print("sth"),
-                  icon: Icon(
-                    Icons.open_in_new_rounded,
                     color: ThemeConfig.darkIcons,
                     size: 24.0,
                   ),
@@ -128,14 +126,48 @@ class _CataloguePageState extends State<CataloguePage> {
     setState(() {
       _child = Row(
         children: [
-          Container(
-            height: 50.0,
-            width: 100.0,
-            color: Colors.blue,
+          Expanded(
+            flex: 8,
             child: TextField(
-              onChanged: (text) {
-                fetchStations(text);
+              decoration: const InputDecoration(
+                  border: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.white,
+                      )
+                  ),
+                  hintText: 'Enter station name'
+              ),
+
+              onChanged: (text) async {
+                List<Station> f = await fetchStations(text);
+                setState(() {
+                  foundStations = f;
+                });
               },
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+              onPressed: () => showSearchBar(),
+              icon: Icon(
+                Icons.search_rounded,
+                color: ThemeConfig.darkIcons,
+                size: 24.0,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+              onPressed: () => {
+                setChild()
+              },
+              icon: Icon(
+                Icons.close_rounded,
+                color: ThemeConfig.darkIcons,
+                size: 24.0,
+              ),
             ),
           ),
         ],
@@ -145,13 +177,16 @@ class _CataloguePageState extends State<CataloguePage> {
   }
 
   fetchStations(String name) async {
+    if (name == "") {
+      return <Station>[];
+    }
     final response = await http.post(
       Uri.parse('https://radish-app.herokuapp.com/radio/find_external'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({
-        'filter_name': name,
+        'filter_name': "name",
         'filter_value': name,
       }),
     );
@@ -161,17 +196,16 @@ class _CataloguePageState extends State<CataloguePage> {
       return;
     }
 
-    print("${response.statusCode} GOT radio/find_external BY $name");
+    print("${response.statusCode} GOT radio/find_external BY -$name-");
     var stationsJson = jsonDecode(response.body);
-    List<Station>? fetchedStations = stationsJson != null ? List.from(stationsJson) : null;
-    if (fetchedStations == null) {
+    List<dynamic>? stationsJ = stationsJson != null ? List.from(stationsJson) : null;
+    if (stationsJ == null) {
       print("couldnt get stations from json");
       return;
     }
 
-    setState(() {
-      foundStations = fetchedStations;
-    });
+    List<Station> fetchedStations = stationsJ.map((station) => Station.fromJson(station)).toList();
+    return fetchedStations;
   }
 
   switchCategory(String category) {
@@ -220,7 +254,7 @@ class _CataloguePageState extends State<CataloguePage> {
                     ),
                   ),
                   Expanded(
-                      child: searching ? radioList(foundStations) : getList(catalogue, categoryChosen!, showStations)
+                      child: searching ? radioList(foundStations, showStation) : getList(catalogue, categoryChosen!, showStations)
                   )
                 ],
               )
@@ -230,33 +264,82 @@ class _CataloguePageState extends State<CataloguePage> {
    }
 }
 
-Widget radioList(List<Station>? stations) {
+Widget radioList(List<Station>? stations, Function(Station) onTap) {
   return ListView(
     padding: EdgeInsets.zero,
     scrollDirection: Axis.vertical,
     children: List.generate(stations?.length ?? 0, (int index) {
       return GestureDetector(
+        onTap: () => onTap(stations!.elementAt(index)),
         child: Container(
-            height: 60.0,
-            decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: ThemeConfig.darkDivider,
-                  ),)
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                    stations!.elementAt(index).name ?? "unknown name"
+          decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: ThemeConfig.darkDivider,
+                ),)
+          ),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Container(
+                    color: Colors.white,
+                    child: stations!.elementAt(index).cover != null ? FadeInImage.assetNetwork(
+                        placeholder: 'images/stationPlaceholder.png',
+                        image: stations.elementAt(index).cover ?? "invalid",
+                        imageErrorBuilder:
+                            (context, error, stackTrace) {
+                          return Image.asset(
+                              'images/stationPlaceholder.png',
+                              height: 70.0,
+                              width: 70.0,
+                              fit: BoxFit.contain);
+                        },
+                        height: 70.0,
+                        width: 70.0,
+                        fit: BoxFit.contain
+                    ) : Image.asset(
+                        'images/stationPlaceholder.png',
+                        height: 70.0,
+                        width: 70.0,
+                        fit: BoxFit.contain
+                    ),
+                  ),
                 ),
               ),
-            )
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:[
+                      Text(
+                        stations.elementAt(index).name ?? "",
+                        style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            color: ThemeConfig.darkAccentPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0),
+                      ),
+                      Text(
+                          stations.elementAt(index).status?.currently_playing_song ?? ""),
+                      Text(
+                        stations.elementAt(index).status?.currently_playing_song ?? "",
+                        style: TextStyle(
+                          color: ThemeConfig.darkIcons,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ]
+                ),
+              ),
+              const SizedBox(width: 20.0)
+            ],
+          ),
         ),
       );
     }),
-  );;
+  );
 }
 
 ButtonStyle buttonStyle(String category, String? chosenCategory) {
