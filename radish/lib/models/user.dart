@@ -65,10 +65,18 @@ class Quality {
 
 @JsonSerializable(explicitToJson: true)
 class Spotify {
-  @JsonKey(name: '_token')
-  String? token;
+  // @JsonKey(name: '_token')
+  String? clientId;
+  String? clientSecret;
+  String? accessToken;
+  String? refreshToken;
+  String? scopes;
+  String? expiration;
+  String? playlistId;
 
-  Spotify({required this.token});
+
+  Spotify({required this.clientId, this.clientSecret, this.accessToken,
+    this.refreshToken, this.scopes, this.expiration, this.playlistId});
 
   factory Spotify.fromJson(Map<String, dynamic> json) => _$SpotifyFromJson(json);
   Map<String, dynamic> toJson() => _$SpotifyToJson(this);

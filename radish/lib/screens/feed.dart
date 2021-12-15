@@ -51,7 +51,7 @@ class _FeedPageState extends State<FeedPage> {
 
   Future<Color> getImagePalette () async {
     try {
-      if (user?.profile?.avatar == null) {
+      if (user?.profile?.avatar == null || user?.profile?.avatar == "") {
         return Colors.white;
       }
       final PaletteGenerator paletteGenerator = await PaletteGenerator
@@ -157,7 +157,7 @@ class _FeedPageState extends State<FeedPage> {
                           borderRadius: BorderRadius.circular(8.0),
                           child: Container(
                             color: Colors.white,
-                            child: user?.profile?.avatar != null ? FadeInImage.assetNetwork(
+                            child: user?.profile?.avatar != null && user?.profile?.avatar != "" ? FadeInImage.assetNetwork(
                                 placeholder: 'images/avatarPlaceholder.png',
                                 image: user!.profile!.avatar!,
                                 height: 90.0,
