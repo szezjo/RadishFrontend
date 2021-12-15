@@ -57,11 +57,9 @@ class _CataloguePageState extends State<CataloguePage> {
     super.initState();
     Future.delayed(Duration.zero, () {
       Map data = ModalRoute.of(context)?.settings.arguments as Map;
-      setState(() {
-        categoryChosen = data["catalogueName"];
-      });
+      print("Got "+ data["catalogueName"]);
+      switchCategory(data["catalogueName"]);
     });
-    searching = false;
     getUserData();
     setChild();
   }
@@ -209,6 +207,9 @@ class _CataloguePageState extends State<CataloguePage> {
   }
 
   switchCategory(String category) {
+    print("was");
+    print(categoryChosen);
+    print("got $category");
     String newCategory = category;
     if (categoryChosen == category) {
       newCategory = "";
@@ -353,8 +354,9 @@ ButtonStyle buttonStyle(String category, String? chosenCategory) {
     ),
     fixedSize: MaterialStateProperty.all(const Size.fromWidth(100)),
     overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
-    foregroundColor: chosen ? MaterialStateProperty.all(ThemeConfig.darkBGSecondary) : MaterialStateProperty.all(Colors.white),
-    backgroundColor: chosen ? MaterialStateProperty.all(ThemeConfig.darkAccentPrimary) : null
+    foregroundColor: MaterialStateProperty.all(Colors.white),
+    // foregroundColor: chosen ? MaterialStateProperty.all(ThemeConfig.darkBGSecondary) : MaterialStateProperty.all(Colors.white),
+    // backgroundColor: chosen ? MaterialStateProperty.all(ThemeConfig.darkAccentPrimary) : null
   );
 }
 
