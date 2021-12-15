@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:radish/models/station.dart';
 import 'package:radish/theme/theme_config.dart';
 import 'dart:convert';
@@ -23,6 +24,7 @@ class _SongListPageState extends State<SongListPage> {
   late String title;
   late List<String> songs;
 
+  List<Log>? activityLog;
   User? user;
 
   getUserData() async {
@@ -218,6 +220,76 @@ class _SongListPageState extends State<SongListPage> {
   void showToast() =>
       Fluttertoast.showToast(msg: 'Added to playlist', fontSize: 18);
 
+  handleLike(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_to_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    var activitiesJson = jsonDecode(response.body);
+    List<dynamic>? activitiesJ =
+        activitiesJson != null ? List.from(activitiesJson) : null;
+    if (activitiesJ == null) {
+      print("couldnt get activity logs from json");
+      return;
+    }
+
+    setState(() {
+      activityLog = activitiesJ.map((log) => Log.fromJson(log)).toList();
+    });
+  }
+
+  handleUnlike(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_song_from_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    var activitiesJson = jsonDecode(response.body);
+    List<dynamic>? activitiesJ =
+        activitiesJson != null ? List.from(activitiesJson) : null;
+    if (activitiesJ == null) {
+      print("couldnt get activity logs from json");
+      return;
+    }
+
+    setState(() {
+      activityLog = activitiesJ.map((log) => Log.fromJson(log)).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Map data = ModalRoute.of(context)?.settings.arguments as Map;
@@ -379,8 +451,13 @@ class _SongListPageState extends State<SongListPage> {
                       Expanded(
                         flex: 1,
                         child: IconButton(
-                          onPressed: () =>
-                              print("faved ${songs.elementAt(index)}"),
+                          onPressed: () {
+                            if (isSongLiked(songs.elementAt(index))) {
+                              handleUnlike(songs.elementAt(index));
+                            } else {
+                              handleLike(songs.elementAt(index));
+                            }
+                          },
                           icon: isSongLiked(songs.elementAt(index))
                               ? Icon(
                                   Icons.favorite_rounded,
