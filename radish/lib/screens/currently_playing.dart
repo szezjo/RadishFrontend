@@ -62,6 +62,17 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
     }
   }
 
+  addToRecentlySongs(String title) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+    setState(() {
+      user?.songs?.recently_played?.add(title);
+    });
+    await saveToUserData(user);
+  }
+
   String getPlayerState() {
     return _playerState;
   }
@@ -363,6 +374,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                   }
                                   if (title != '') {
                                     print('set new title');
+                                    // addToRecentlySongs(title);
                                     setCurrentTitle(title);
                                   }
                                   return Text(title,
