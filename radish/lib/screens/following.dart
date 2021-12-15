@@ -242,13 +242,37 @@ class _FollowingPageState extends State<FollowingPage> {
     }
   }
 
-  handleClick(String? email) {
+  handleClick(String? email) async {
     if (email != null && user?.following != null) {
+      String endpointUrl = "";
+      String body = "";
       if (user!.following!.contains(email)) {
-        // unfollow
+        endpointUrl = "unfollow_ziomeczka";
+        body = jsonEncode({
+          'token': user?.token,
+          'followed_email': email,
+        });
       } else {
-        // follow
+        endpointUrl = "follow_user";
+        body = jsonEncode({
+          'token': user?.token,
+          'user_email': email,
+        });
       }
+
+      final response = await http.post(
+        Uri.parse('https://radish-app.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: body,
+      );
+      if (response.statusCode != 200) {
+        print("${response.statusCode} COULDN'T DO $endpointUrl");
+        print("${jsonDecode(response.body)}");
+        return;
+      }
+
     }
   }
 
@@ -265,7 +289,10 @@ class _FollowingPageState extends State<FollowingPage> {
       body: Column(
           children: [
             const SizedBox(height: 60.0),
-            _child,
+            AnimatedSwitcher(
+                duration: Duration(milliseconds: 200),
+                child: _child,
+            ),
             searching ? userList(foundUsers, isFollowed, handleClick) : userList(followedUsers, isFollowed, handleClick)
           ]
       ),
