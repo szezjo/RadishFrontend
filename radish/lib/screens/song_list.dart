@@ -305,7 +305,8 @@ class _SongListPageState extends State<SongListPage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Container(
-                    child: user?.profile?.avatar != null
+                    child: user?.profile?.avatar != null &&
+                        user?.profile?.avatar != ""
                         ? FadeInImage.assetNetwork(
                             placeholder: 'images/avatarPlaceholder.png',
                             image: user!.profile!.avatar!,

@@ -63,7 +63,8 @@ class _FollowingPageState extends State<FollowingPage> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
                       child: Container(
-                        child: user?.profile?.avatar != null ? FadeInImage.assetNetwork(
+                        child: user?.profile?.avatar != null &&
+                            user?.profile?.avatar != "" ? FadeInImage.assetNetwork(
                             placeholder: 'images/avatarPlaceholder.png',
                             image: user!.profile!.avatar!,
                             height: 50.0,
