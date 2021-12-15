@@ -17,9 +17,11 @@ class CataloguePage extends StatefulWidget {
 class _CataloguePageState extends State<CataloguePage> {
 
   late Catalogues catalogue;
+  late bool searching;
 
   String? categoryChosen;
   User? user;
+  List<Station>? foundStations;
 
   getUserData() async {
     SharedPreferences storage = await SharedPreferences.getInstance();
@@ -40,6 +42,8 @@ class _CataloguePageState extends State<CataloguePage> {
     });
   }
 
+  Widget _child = SizedBox(height: 60.0);
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +53,125 @@ class _CataloguePageState extends State<CataloguePage> {
         categoryChosen = data["catalogueName"];
       });
     });
+    searching = false;
     getUserData();
+    setChild();
+  }
+
+  setChild() {
+    setState(() {
+      _child = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                flex: 8,
+                child: Text(
+                  "Catalogue",
+                  style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: IconButton(
+                  onPressed: () => showSearchBar(),
+                  icon: Icon(
+                    Icons.search_rounded,
+                    color: ThemeConfig.darkIcons,
+                    size: 24.0,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: IconButton(
+                  onPressed: () => print("sth"),
+                  icon: Icon(
+                    Icons.open_in_new_rounded,
+                    color: ThemeConfig.darkIcons,
+                    size: 24.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 40.0, bottom: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                    style: buttonStyle("Genres", categoryChosen),
+                    child: const Text("Genres"),
+                    onPressed: () => {switchCategory("Genres")}
+                ),
+                TextButton(
+                    style: buttonStyle("Decades", categoryChosen),
+                    child: const Text("Decades"),
+                    onPressed: () => {switchCategory("Decades")}
+                ),
+                TextButton(
+                    style: buttonStyle("Countries", categoryChosen),
+                    child: const Text("Countries"),
+                    onPressed: () => {switchCategory("Countries")}
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  showSearchBar() {
+    setState(() {
+      _child = Row(
+        children: [
+          Container(
+            height: 50.0,
+            width: 100.0,
+            color: Colors.blue,
+            child: TextField(
+              onChanged: (text) {
+                fetchStations(text);
+              },
+            ),
+          ),
+        ],
+      );
+      searching = true;
+    });
+  }
+
+  fetchStations(String name) async {
+    final response = await http.post(
+      Uri.parse('https://radish-app.herokuapp.com/radio/find_external'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'filter_name': name,
+        'filter_value': name,
+      }),
+    );
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET STATIONS BY $name");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT radio/find_external BY $name");
+    var stationsJson = jsonDecode(response.body);
+    List<Station>? fetchedStations = stationsJson != null ? List.from(stationsJson) : null;
+    if (fetchedStations == null) {
+      print("couldnt get stations from json");
+      return;
+    }
+
+    setState(() {
+      foundStations = fetchedStations;
+    });
   }
 
   switchCategory(String category) {
@@ -84,66 +206,9 @@ class _CataloguePageState extends State<CataloguePage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 80.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Expanded(
-                              flex: 8,
-                              child: Text(
-                                "Catalogue",
-                                style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: IconButton(
-                                onPressed: () => print("lookfor"),
-                                icon: Icon(
-                                  Icons.search_rounded,
-                                  color: ThemeConfig.darkIcons,
-                                  size: 24.0,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: IconButton(
-                                onPressed: () => print("sth"),
-                                icon: Icon(
-                                  Icons.open_in_new_rounded,
-                                  color: ThemeConfig.darkIcons,
-                                  size: 24.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 40.0, bottom: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              TextButton(
-                                style: buttonStyle("Genres", categoryChosen),
-                                child: const Text("Genres"),
-                                onPressed: () => {switchCategory("Genres")}
-                              ),
-                              TextButton(
-                                  style: buttonStyle("Decades", categoryChosen),
-                                child: const Text("Decades"),
-                                onPressed: () => {switchCategory("Decades")}
-                              ),
-                              TextButton(
-                                style: buttonStyle("Countries", categoryChosen),
-                                child: const Text("Countries"),
-                                onPressed: () => {switchCategory("Countries")}
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    child: AnimatedSwitcher(
+                      duration: Duration(milliseconds: 200),
+                      child: _child,
                     ),
                   ),
                   Container(
@@ -155,7 +220,7 @@ class _CataloguePageState extends State<CataloguePage> {
                     ),
                   ),
                   Expanded(
-                      child: getList(catalogue, categoryChosen!, showStations)
+                      child: searching ? radioList(foundStations) : getList(catalogue, categoryChosen!, showStations)
                   )
                 ],
               )
@@ -163,6 +228,35 @@ class _CataloguePageState extends State<CataloguePage> {
         )
     );
    }
+}
+
+Widget radioList(List<Station>? stations) {
+  return ListView(
+    padding: EdgeInsets.zero,
+    scrollDirection: Axis.vertical,
+    children: List.generate(stations?.length ?? 0, (int index) {
+      return GestureDetector(
+        child: Container(
+            height: 60.0,
+            decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: ThemeConfig.darkDivider,
+                  ),)
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                    stations!.elementAt(index).name ?? "unknown name"
+                ),
+              ),
+            )
+        ),
+      );
+    }),
+  );;
 }
 
 ButtonStyle buttonStyle(String category, String? chosenCategory) {
@@ -215,7 +309,7 @@ Widget labelList(List<Label>? labels, Function(Label) onTap) {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                labels.elementAt(index).label ?? "unknown"
+                labels.elementAt(index).label != null ? '${labels.elementAt(index).label!} (${labels.elementAt(index).stations?.length ?? 0})' : "unknown"
               ),
             ),
           )
