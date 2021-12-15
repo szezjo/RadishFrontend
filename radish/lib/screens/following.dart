@@ -242,7 +242,8 @@ class _FollowingPageState extends State<FollowingPage> {
     }
   }
 
-  handleClick(String? email) async {
+  handleClick(FollowedUser? userToCheck) async {
+    String email = userToCheck?.email ?? "";
     if (email != null && user?.following != null) {
       String endpointUrl = "";
       String body = "";
@@ -276,10 +277,12 @@ class _FollowingPageState extends State<FollowingPage> {
       if (user!.following!.contains(email)) {
         setState(() {
           user?.following?.remove(email);
+          followedUsers?.removeWhere((user) => user.email == email);
         });
       } else {
         setState(() {
           user?.following?.add(email);
+          followedUsers?.add(userToCheck!);
         });
       }
       await saveToUserData(user);
@@ -317,9 +320,7 @@ class _FollowingPageState extends State<FollowingPage> {
   }
 }
 
-Widget userList(List<FollowedUser>? users, Function(String?) isFollowed, Function(String?) onTap) {
-  print("got $users");
-
+Widget userList(List<FollowedUser>? users, Function(String?) isFollowed, Function(FollowedUser?) onTap) {
   getTimeAgo(String? timestamp) {
     try {
       if (timestamp != null) {
@@ -412,7 +413,7 @@ Widget userList(List<FollowedUser>? users, Function(String?) isFollowed, Functio
                     ),
                   ),
                   IconButton(
-                      onPressed: () => { onTap(users?.elementAt(index).email) },
+                      onPressed: () => { onTap(users?.elementAt(index)) },
                       icon: Icon(
                         isFollowed(users?.elementAt(index).email) ? Icons.person_remove_alt_1_rounded : Icons.person_add_alt_1_outlined,
                         color: ThemeConfig.darkAccentPrimary,
