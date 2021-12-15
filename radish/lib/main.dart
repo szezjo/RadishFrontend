@@ -12,6 +12,7 @@ import 'package:radish/screens/login.dart';
 import 'package:radish/screens/signup.dart';
 import 'package:radish/screens/currently_playing.dart';
 import 'package:radish/screens/feed.dart';
+import 'package:radish/screens/settings.dart';
 import 'package:radish/theme/theme_config.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,35 +38,82 @@ class Radish extends StatelessWidget {
       theme: ThemeConfig.darkTheme,
       onGenerateRoute: (settings) {
         dynamic page;
-        switch(settings.name) {
-          case "/welcome": {  page = const WelcomePage(); }
-          break;
-          case "/login": {  page = const LoginPage(); }
-          break;
-          case "/signup": {  page = const SignUpPage(); }
-          break;
-          case "/home": {  page = const MainScreen(); }
-          break;
-          case "/listen": {  page = const ListenPage(); }
-          break;
-          case "/stations": {  page = const StationListPage(); }
-          break;
-          case "/station": {  page = const StationPage(); }
-          break;
-          case "/player": {  page = const CurrentlyPlaying(); }
-          break;
-          case "/catalogue": {  page = const CataloguePage(); }
-          break;
-          case "/feed": {  page = const FeedPage(); }
-          break;
-          case "/recently": {  page = const SongListPage(); }
-          break;
-          case "/discoveries": {  page = const SongListPage(); }
-          break;
-          case "/following": {  page = const FollowingPage(); }
-          break;
-          default: { page = const LoadingPage(); }
-          break;
+        switch (settings.name) {
+          case "/welcome":
+            {
+              page = const WelcomePage();
+            }
+            break;
+          case "/login":
+            {
+              page = const LoginPage();
+            }
+            break;
+          case "/signup":
+            {
+              page = const SignUpPage();
+            }
+            break;
+          case "/home":
+            {
+              page = const MainScreen();
+            }
+            break;
+          case "/listen":
+            {
+              page = const ListenPage();
+            }
+            break;
+          case "/stations":
+            {
+              page = const StationListPage();
+            }
+            break;
+          case "/station":
+            {
+              page = const StationPage();
+            }
+            break;
+          case "/player":
+            {
+              page = const CurrentlyPlaying();
+            }
+            break;
+          case "/catalogue":
+            {
+              page = const CataloguePage();
+            }
+            break;
+          case "/feed":
+            {
+              page = const FeedPage();
+            }
+            break;
+          case "/recently":
+            {
+              page = const SongListPage();
+            }
+            break;
+          case "/discoveries":
+            {
+              page = const SongListPage();
+            }
+            break;
+          case "/following":
+            {
+              page = const FollowingPage();
+            }
+            break;
+          case "/settings":
+            {
+              page = const SettingsPage();
+            }
+            break;
+          default:
+            {
+              page = const LoadingPage();
+            }
+            break;
         }
         return PageRouteBuilder(
           settings:

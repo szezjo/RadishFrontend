@@ -309,7 +309,9 @@ class _FeedPageState extends State<FeedPage> {
                 Expanded(
                   flex: 1,
                   child: IconButton(
-                    onPressed: () => print("settings"),
+                    onPressed: () {
+                      Navigator.pushNamed(context, "/settings");
+                    },
                     icon: Icon(
                       Icons.settings_rounded,
                       color: ThemeConfig.darkIcons,
