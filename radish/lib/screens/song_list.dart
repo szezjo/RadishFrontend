@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:radish/models/station.dart';
 import 'package:radish/theme/theme_config.dart';
 import 'dart:convert';
@@ -23,6 +24,7 @@ class _SongListPageState extends State<SongListPage> {
   late String title;
   late List<String> songs;
 
+  List<Log>? activityLog;
   User? user;
 
   getUserData() async {
@@ -35,6 +37,12 @@ class _SongListPageState extends State<SongListPage> {
     setState(() {
       user = User.fromJson(stringQueryParameters);
     });
+  }
+
+  saveToUserData(user) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user);
+    storage.setString('userData', userJson);
   }
 
   @override
@@ -164,15 +172,77 @@ class _SongListPageState extends State<SongListPage> {
   void showToast() =>
       Fluttertoast.showToast(msg: 'Added to playlist', fontSize: 18);
 
+
   void showAuthErrToast() => Fluttertoast.showToast(
       msg: 'Link your Spotify account in settings to use this function',
       fontSize: 18);
+
+  handleLike(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_to_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.add(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlike(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_song_from_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.remove(song);
+    });
+    await saveToUserData(user);
+  }
+
 
   @override
   Widget build(BuildContext context) {
     Map data = ModalRoute.of(context)?.settings.arguments as Map;
     title = data["title"];
-    songs = data["songs"];
+    if (data["songs"] == null) {
+      songs = [];
+    } else {
+      songs = data["songs"];
+    }
 
     return Scaffold(
       body: Column(children: [
@@ -187,7 +257,8 @@ class _SongListPageState extends State<SongListPage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Container(
-                    child: user?.profile?.avatar != null
+                    child: user?.profile?.avatar != null &&
+                        user?.profile?.avatar != ""
                         ? FadeInImage.assetNetwork(
                             placeholder: 'images/avatarPlaceholder.png',
                             image: user!.profile!.avatar!,
@@ -284,7 +355,13 @@ class _SongListPageState extends State<SongListPage> {
                                 ]));
                       });
                 },
-                onDoubleTap: () => print("liked ${songs.elementAt(index)}"),
+                onDoubleTap: () {
+                            if (isSongLiked(songs.elementAt(index))) {
+                              handleUnlike(songs.elementAt(index));
+                            } else {
+                              handleLike(songs.elementAt(index));
+                            }
+                          },
                 child: Container(
                   height: 60.0,
                   decoration: BoxDecoration(
@@ -320,8 +397,13 @@ class _SongListPageState extends State<SongListPage> {
                       Expanded(
                         flex: 1,
                         child: IconButton(
-                          onPressed: () =>
-                              print("faved ${songs.elementAt(index)}"),
+                          onPressed: () {
+                            if (isSongLiked(songs.elementAt(index))) {
+                              handleUnlike(songs.elementAt(index));
+                            } else {
+                              handleLike(songs.elementAt(index));
+                            }
+                          },
                           icon: isSongLiked(songs.elementAt(index))
                               ? Icon(
                                   Icons.favorite_rounded,

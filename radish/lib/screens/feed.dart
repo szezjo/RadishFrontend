@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:radish/models/user.dart';
+import 'package:radish/models/station.dart';
 import 'package:radish/theme/theme_config.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -45,6 +46,124 @@ class _FeedPageState extends State<FeedPage> {
     setState(() {
       user = User.fromJson(stringQueryParameters);
     });
+  }
+
+  saveToUserData(user) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user);
+    storage.setString('userData', userJson);
+  }
+
+  handleLikeSong(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_to_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.add(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlikeSong(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_song_from_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.remove(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleLikeStation(Station station) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_radio_to_favourites";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'api_id': station.api_id}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.stations?.favourites?.add(station.api_id.toString());
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlikeStation(Station station) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_radio_from_favourites";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'api_id': station.api_id}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.stations?.favourites?.remove(station.api_id.toString());
+    });
+    await saveToUserData(user);
   }
 
   Future<Color> getImagePalette() async {
@@ -250,18 +369,38 @@ class _FeedPageState extends State<FeedPage> {
             ),
           )
         ]),
-        Expanded(child: activityList(activityLog, user))
+        Expanded(child: activityList(activityLog, user, this))
       ]),
     );
   }
 }
 
-Widget activityList(List<Log>? activityLog, User? user) {
+Widget activityList(List<Log>? activityLog, User? user, _FeedPageState parent) {
   isLiked(Log log) {
     if (log.radio != null) {
       return user!.stations!.favourites!.contains(log.radio!.api_id);
     } else if (log.song != "" && log.song != null) {
       return user!.songs!.discovered!.contains(log.song);
+    } else {
+      return false;
+    }
+  }
+
+  handleLike(Log log) {
+    if (log.radio != null) {
+      parent.handleLikeStation(log.radio!);
+    } else if (log.song != "" && log.song != null) {
+      parent.handleLikeSong(log.song.toString());
+    } else {
+      return false;
+    }
+  }
+
+  handleUnlike(Log log) {
+    if (log.radio != null) {
+      parent.handleUnlikeStation(log.radio!);
+    } else if (log.song != "" && log.song != null) {
+      parent.handleUnlikeSong(log.song.toString());
     } else {
       return false;
     }
@@ -334,7 +473,13 @@ Widget activityList(List<Log>? activityLog, User? user) {
                     ]),
               ),
               IconButton(
-                onPressed: () => print(activityLog.elementAt(index).did),
+                onPressed: () {
+                  if (isLiked(activityLog.elementAt(index))) {
+                    handleUnlike(activityLog.elementAt(index));
+                  } else {
+                    handleLike(activityLog.elementAt(index));
+                  }
+                },
                 icon: isLiked(activityLog.elementAt(index))
                     ? Icon(
                         Icons.favorite_rounded,

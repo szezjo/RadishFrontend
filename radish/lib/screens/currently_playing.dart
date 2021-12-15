@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_radio_player/flutter_radio_player.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-
+import 'package:radish/models/user.dart';
 import 'package:radish/models/station.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:radish/theme/theme_config.dart';
 
 class CurrentlyPlaying extends StatefulWidget {
   const CurrentlyPlaying({Key? key}) : super(key: key);
@@ -18,11 +20,13 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
   FlutterRadioPlayer _radioPlayer = FlutterRadioPlayer();
   var _playerState = FlutterRadioPlayer.flutter_radio_playing;
   var _oldTitle = '';
+  User? user;
   Station? station;
 
   @override
   void initState() {
     super.initState();
+    getUserData();
     initRadioService();
   }
 
@@ -102,6 +106,144 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
         print("Exception occurred while trying to register the services.");
       }
     }
+  }
+
+  getUserData() async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    var userData = storage.getString('userData');
+    Map json = jsonDecode(userData.toString());
+    Map<String, dynamic> stringQueryParameters =
+        json.map((key, value) => MapEntry(key.toString(), value));
+
+    setState(() {
+      user = User.fromJson(stringQueryParameters);
+    });
+  }
+
+  saveToUserData(user) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user);
+    storage.setString('userData', userJson);
+  }
+
+  handleLikeSong(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_to_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.add(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlikeSong(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_song_from_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.remove(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleLikeStation(Station station) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_radio_to_favourites";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'api_id': station.api_id}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.stations?.favourites?.add(station.api_id.toString());
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlikeStation(Station station) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_radio_from_favourites";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'api_id': station.api_id}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.stations?.favourites?.remove(station.api_id.toString());
+    });
+    await saveToUserData(user);
+  }
+
+  isSongLiked(String name) {
+    return user!.songs!.discovered!.contains(name);
+  }
+
+  isStationLiked(Station station) {
+    return user!.stations!.favourites!.contains(station.api_id);
   }
 
   @override
@@ -253,6 +395,8 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                 if (snapshot.data ==
                                     FlutterRadioPlayer.flutter_radio_playing) {
                                   return IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
                                     onPressed: () async {
                                       await _radioPlayer.stop();
                                       SharedPreferences storage =
@@ -267,6 +411,8 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                   );
                                 } else {
                                   return IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
                                     onPressed: () async {
                                       await initRadioService();
                                       SharedPreferences storage =
@@ -282,15 +428,66 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                 }
                               },
                             ),
-                            const Icon(
-                              Icons.favorite_border,
-                              color: Colors.white10,
-                              size: 60,
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                if (_oldTitle != '') {
+                                  if (isSongLiked(_oldTitle)) {
+                                    handleUnlikeSong(_oldTitle);
+                                  } else {
+                                    handleLikeSong(_oldTitle);
+                                  }
+                                }
+                              },
+                              icon: isSongLiked(_oldTitle)
+                                  ? Icon(
+                                      Icons.favorite_rounded,
+                                      color: ThemeConfig.darkAccentPrimary,
+                                      size: 36.0,
+                                    )
+                                  : Icon(
+                                      Icons.favorite_outline_rounded,
+                                      color: ThemeConfig.darkIcons,
+                                      size: 36.0,
+                                    ),
                             ),
-                            const Icon(
-                              Icons.keyboard_control,
-                              color: Colors.grey,
-                              size: 36,
+                            IconButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Container(
+                                          color: Colors.black12,
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                ListTile(
+                                                    title: isStationLiked(station!)
+                                                        ? Text(
+                                                            'Remove station from favourites')
+                                                        : Text(
+                                                            'Add station to favourites'),
+                                                    onTap: () {
+                                                      Navigator.pop(context);
+                                                      if (isStationLiked(
+                                                          station!)) {
+                                                        handleUnlikeStation(
+                                                            station!);
+                                                      } else
+                                                        handleLikeStation(
+                                                            station!);
+                                                    })
+                                              ]));
+                                    });
+                              },
+                              icon: const Icon(
+                                Icons.keyboard_control,
+                                color: Colors.grey,
+                                size: 36,
+                              ),
                             )
                           ],
                         ))

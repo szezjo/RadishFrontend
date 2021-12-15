@@ -125,10 +125,12 @@ class _StationPageState extends State<StationPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                              station.status?.currently_playing_song ?? "",
+                              //station.status?.currently_playing_song ?? "",
+                              "",
                           style: const TextStyle(fontSize: 12.0)),
                           Text(
-                            station.status?.currently_playing_song ?? "",
+                            //station.status?.currently_playing_song ?? "",
+                            "",
                             style: TextStyle(
                               fontSize: 11.0,
                               color: ThemeConfig.darkIcons,
