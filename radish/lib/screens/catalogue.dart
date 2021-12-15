@@ -33,6 +33,13 @@ class _CataloguePageState extends State<CataloguePage> {
     });
   }
 
+  showStations(Label label) {
+    Navigator.pushNamed(context, "/stations", arguments: {
+      "category": label.label,
+      "stations": label.stations
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -148,7 +155,7 @@ class _CataloguePageState extends State<CataloguePage> {
                     ),
                   ),
                   Expanded(
-                      child: getList(catalogue, categoryChosen!)
+                      child: getList(catalogue, categoryChosen!, showStations)
                   )
                 ],
               )
@@ -174,27 +181,27 @@ ButtonStyle buttonStyle(String category, String? chosenCategory) {
   );
 }
 
-Widget getList(Catalogues catalogue, String categoryChosen) {
+Widget getList(Catalogues catalogue, String categoryChosen, Function(Label) onTap) {
   if (categoryChosen == "Genres") {
-    return labelList(catalogue.genres);
+    return labelList(catalogue.genres, onTap);
   } else if (categoryChosen == "Decades") {
-    return labelList(catalogue.decades);
+    return labelList(catalogue.decades, onTap);
   } else if (categoryChosen == "Countries") {
-    return labelList(catalogue.countries);
+    return labelList(catalogue.countries, onTap);
   } else {
     var allLabels = [...?catalogue.genres, ...?catalogue.decades, ...?catalogue.countries];
-    return labelList(allLabels);
+    return labelList(allLabels, onTap);
   }
 }
 
-Widget labelList(List<Label>? labels) {
+Widget labelList(List<Label>? labels, Function(Label) onTap) {
   labels!.sort((a, b) => a.label!.compareTo(b.label!));
   return ListView(
     padding: EdgeInsets.zero,
     scrollDirection: Axis.vertical,
     children: List.generate(labels.length, (int index) {
       return GestureDetector(
-        onTap: () => print("look into ${labels.elementAt(index)}"),
+        onTap: () => onTap(labels.elementAt(index)),
         child: Container(
           height: 60.0,
           decoration: BoxDecoration(
