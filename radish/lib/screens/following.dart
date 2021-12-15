@@ -273,7 +273,24 @@ class _FollowingPageState extends State<FollowingPage> {
         return;
       }
 
+      if (user!.following!.contains(email)) {
+        setState(() {
+          user?.following?.remove(email);
+        });
+      } else {
+        setState(() {
+          user?.following?.add(email);
+        });
+      }
+      await saveToUserData(user);
+
     }
+  }
+
+  saveToUserData(user) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user);
+    storage.setString('userData', userJson);
   }
 
   isFollowed(String? email) {
