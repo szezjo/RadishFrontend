@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:radish/screens/catalogue.dart';
 import 'package:radish/screens/following.dart';
 import 'package:radish/screens/home.dart';
 import 'package:radish/screens/listen.dart';
@@ -10,7 +11,7 @@ import 'package:radish/screens/welcome.dart';
 import 'package:radish/screens/login.dart';
 import 'package:radish/screens/signup.dart';
 import 'package:radish/screens/currently_playing.dart';
-import 'package:radish/screens/catalogue.dart';
+import 'package:radish/screens/catalogue_search.dart';
 import 'package:radish/screens/feed.dart';
 import 'package:radish/theme/theme_config.dart';
 

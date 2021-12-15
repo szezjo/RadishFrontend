@@ -74,63 +74,71 @@ class _StationListPageState extends State<StationListPage> {
                   children: List.generate(stations.length, (int index) {
                     return GestureDetector(
                       onTap: () => showStation(stations.elementAt(index)),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Container(
-                                color: Colors.white,
-                                child: stations.elementAt(index).cover != null ? FadeInImage.assetNetwork(
-                                    placeholder: 'images/stationPlaceholder.png',
-                                    image: stations.elementAt(index).cover ?? "invalid",
-                                    imageErrorBuilder:
-                                        (context, error, stackTrace) {
-                                      return Image.asset(
-                                          'images/stationPlaceholder.png',
-                                          height: 70.0,
-                                          width: 70.0,
-                                          fit: BoxFit.contain);
-                                    },
-                                    height: 70.0,
-                                    width: 70.0,
-                                    fit: BoxFit.contain
-                                ) : Image.asset(
-                                    'images/stationPlaceholder.png',
-                                    height: 70.0,
-                                    width: 70.0,
-                                    fit: BoxFit.contain
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: ThemeConfig.darkDivider,
+                              ),)
+                        ),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Container(
+                                  color: Colors.white,
+                                  child: stations.elementAt(index).cover != null ? FadeInImage.assetNetwork(
+                                      placeholder: 'images/stationPlaceholder.png',
+                                      image: stations.elementAt(index).cover ?? "invalid",
+                                      imageErrorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                            'images/stationPlaceholder.png',
+                                            height: 70.0,
+                                            width: 70.0,
+                                            fit: BoxFit.contain);
+                                      },
+                                      height: 70.0,
+                                      width: 70.0,
+                                      fit: BoxFit.contain
+                                  ) : Image.asset(
+                                      'images/stationPlaceholder.png',
+                                      height: 70.0,
+                                      width: 70.0,
+                                      fit: BoxFit.contain
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children:[
-                                Text(
-                                  stations.elementAt(index).name ?? "",
-                                  style: TextStyle(
-                                      overflow: TextOverflow.ellipsis,
-                                      color: ThemeConfig.darkAccentPrimary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.0),
-                                ),
-                                Text(
-                                    stations.elementAt(index).status?.currently_playing_song ?? ""),
-                                Text(
-                                    stations.elementAt(index).status?.currently_playing_song ?? "",
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children:[
+                                  Text(
+                                    stations.elementAt(index).name ?? "",
                                     style: TextStyle(
-                                        color: ThemeConfig.darkIcons,
                                         overflow: TextOverflow.ellipsis,
-                                    ),
-                                ),
-                              ]
+                                        color: ThemeConfig.darkAccentPrimary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18.0),
+                                  ),
+                                  Text(
+                                      stations.elementAt(index).status?.currently_playing_song ?? ""),
+                                  Text(
+                                      stations.elementAt(index).status?.currently_playing_song ?? "",
+                                      style: TextStyle(
+                                          color: ThemeConfig.darkIcons,
+                                          overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ),
+                                ]
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 20.0)
-                        ],
+                            const SizedBox(width: 20.0)
+                          ],
+                        ),
                       ),
                     );
                   }),
