@@ -46,6 +46,8 @@ dependencies:
   spotify: ^0.6.0
   flutter_web_auth: ^0.4.0
   fluttertoast: ^8.0.8
+  timeago: ^3.1.0
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
