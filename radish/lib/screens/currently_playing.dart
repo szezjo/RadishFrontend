@@ -471,6 +471,7 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                                         : Text(
                                                             'Add station to favourites'),
                                                     onTap: () {
+                                                      Navigator.pop(context);
                                                       if (isStationLiked(
                                                           station!)) {
                                                         handleUnlikeStation(
