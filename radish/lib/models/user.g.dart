@@ -92,11 +92,23 @@ Map<String, dynamic> _$QualityToJson(Quality instance) => <String, dynamic>{
     };
 
 Spotify _$SpotifyFromJson(Map<String, dynamic> json) => Spotify(
-      token: json['_token'] as String?,
+      clientId: json['clientId'] as String?,
+      clientSecret: json['clientSecret'] as String?,
+      accessToken: json['accessToken'] as String?,
+      refreshToken: json['refreshToken'] as String?,
+      scopes: json['scopes'] as String?,
+      expiration: json['expiration'] as String?,
+      playlistId: json['playlistId'] as String?,
     );
 
 Map<String, dynamic> _$SpotifyToJson(Spotify instance) => <String, dynamic>{
-      '_token': instance.token,
+      'clientId': instance.clientId,
+      'clientSecret': instance.clientSecret,
+      'accessToken': instance.accessToken,
+      'refreshToken': instance.refreshToken,
+      'scopes': instance.scopes,
+      'expiration': instance.expiration,
+      'playlistId': instance.playlistId,
     };
 
 Notion _$NotionFromJson(Map<String, dynamic> json) => Notion(
