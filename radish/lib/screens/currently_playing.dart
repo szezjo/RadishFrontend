@@ -26,8 +26,40 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
   @override
   void initState() {
     super.initState();
-    getUserData();
-    initRadioService();
+    setupApp();
+  }
+
+  setupApp() async {
+    await getUserData();
+    await initRadioService();
+    addToRecently();
+  }
+
+  addToRecently() async {
+    print("adding ${station!.name}");
+    if (station != null) {
+      print(user!.token);
+      print(station!.api_id);
+
+      String endpointUrl = "add_radio_to_recently_played";
+
+      final response = await http.post(
+          Uri.parse('https://radish-app.herokuapp.com/user/$endpointUrl'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode({
+            'token': user!.token,
+            'api_id': station!.api_id,
+          })
+      );
+      if (response.statusCode != 200) {
+        print("${response.statusCode} COULDN'T DO $endpointUrl");
+        print("${jsonDecode(response.body)}");
+        return;
+      }
+      print("${response.statusCode} added ${station!.name}");
+    }
   }
 
   String getPlayerState() {
@@ -275,14 +307,14 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text('Currently playing',
+                            const Text('Currently playing',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.grey, fontSize: 14)),
                             Text(station?.name ?? "",
                                 // "Absolute Radio",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500)),
@@ -300,11 +332,19 @@ class _CurrentlyPlayingState extends State<CurrentlyPlaying> {
                                 60, 0, 60, 0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(40),
-                              child: FadeInImage.assetNetwork(
-                                image: station?.cover ?? "",
-                                placeholder: 'images/stationPlaceholder.png',
-                                // 'https://i.scdn.co/image/ab67616d00001e029b95ca5babfa8f869f87e026',
-                                fit: BoxFit.fill,
+                              child: station!.cover != null ? FadeInImage.assetNetwork(
+                                  placeholder: 'images/stationPlaceholder.png',
+                                  image: station!.cover ?? "invalid",
+                                  imageErrorBuilder:
+                                      (context, error, stackTrace) {
+                                    return Image.asset(
+                                        'images/stationPlaceholder.png',
+                                        fit: BoxFit.fill);
+                                  },
+                                  fit: BoxFit.fill
+                              ) : Image.asset(
+                                  'images/stationPlaceholder.png',
+                                  fit: BoxFit.fill
                               ),
                             ),
                           ),
