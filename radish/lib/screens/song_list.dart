@@ -41,6 +41,7 @@ class _SongListPageState extends State<SongListPage> {
   void initState() {
     super.initState();
     getUserData();
+    retrieve();
   }
 
   showStation(Station? station) async {
@@ -60,26 +61,6 @@ class _SongListPageState extends State<SongListPage> {
   #################################################################### */
 
   var _spotifyClient;
-
-  final _scopes = {
-    'user-read-playback-state',
-    'user-follow-read',
-    'playlist-modify-private',
-    'playlist-modify-public'
-  };
-
-  void authorize() async {
-    var client_id = "490d4f51b3134954a90ad7ad14f6bb56";
-    var secret_id = "45c9d4b6362a44f0820dec6fb14fd796";
-
-    var credentials = sp.SpotifyApiCredentials(client_id, secret_id);
-    _spotifyClient = await _getUserAuthenticatedSpotifyApi(credentials);
-
-    _spotifyClient.getCredentials().then((value) {
-      saveCredentials(value);
-      _createPlaylist(_spotifyClient);
-    });
-  }
 
   void saveCredentials(sp.SpotifyApiCredentials credentials) async {
     SharedPreferences storage = await SharedPreferences.getInstance();
@@ -113,6 +94,14 @@ class _SongListPageState extends State<SongListPage> {
 
   void retrieve() async {
     final spotifyCredentials = await loadCredentials();
+    if (spotifyCredentials.clientId == null ||
+        spotifyCredentials.clientSecret == null ||
+        spotifyCredentials.accessToken == null ||
+        spotifyCredentials.refreshToken == null ||
+        spotifyCredentials.scopes == null ||
+        spotifyCredentials.expiration == null) {
+      return;
+    }
 
     print("ID " + spotifyCredentials.clientId.toString());
     print("ACCESS " + spotifyCredentials.accessToken.toString());
@@ -124,59 +113,16 @@ class _SongListPageState extends State<SongListPage> {
     });
   }
 
-  Future<sp.SpotifyApi?> _getUserAuthenticatedSpotifyApi(
-      sp.SpotifyApiCredentials credentials) async {
-    var redirect = "radish:/";
-    print(redirect);
-    var grant = sp.SpotifyApi.authorizationCodeGrant(credentials);
-    var authUri =
-        grant.getAuthorizationUrl(Uri.parse(redirect), scopes: _scopes);
-
-    var redirectUrl;
-    final result = await FlutterWebAuth.authenticate(
-        url: authUri.toString(), callbackUrlScheme: 'radish');
-
-    if (result == '' || (redirectUrl = Uri.tryParse(result)) == null) {
-      print('Invalid redirect url');
-      return null;
-    }
-
-    var client =
-        await grant.handleAuthorizationResponse(redirectUrl.queryParameters);
-    return sp.SpotifyApi.fromClient(client);
-  }
-
-  String getAccessToken(String toParse) {
-    if (toParse.contains("access_token")) {
-      int start = toParse.indexOf("access_token=") + "access_token=".length;
-      String newSub = toParse.substring(start);
-      int end = newSub.indexOf('&');
-      return newSub.substring(0, end);
-    } else {
-      return '';
-    }
-  }
-
-  void authenticate() async {
-    final result = await FlutterWebAuth.authenticate(
-        url:
-            "https://accounts.spotify.com/authorize?client_id=490d4f51b3134954a90ad7ad14f6bb56&redirect_uri=radish:/&scope=user-read-currently-playing&response_type=token&state=SomeStateHere",
-        callbackUrlScheme: 'radish');
-
-    final response = Uri.parse(result);
-    print(getAccessToken(response.toString()));
-  }
-
   List<String> _searchResults = [];
   List<String> _searchHrefs = [];
 
   Future<void> _search(sp.SpotifyApi spotify, String query) async {
     _searchResults = [];
     _searchHrefs = [];
-    var search = await spotify.search
-        .get(query)
-        .first(5)
-        .catchError((err) => print((err as sp.SpotifyException).message));
+    var search = await spotify.search.get(query).first(5).catchError((err) {
+      print((err as sp.SpotifyException).message);
+      showAuthErrToast();
+    });
     if (search == null) return;
     search.forEach((pages) {
       pages.items!.forEach((item) {
@@ -217,6 +163,10 @@ class _SongListPageState extends State<SongListPage> {
 
   void showToast() =>
       Fluttertoast.showToast(msg: 'Added to playlist', fontSize: 18);
+
+  void showAuthErrToast() => Fluttertoast.showToast(
+      msg: 'Link your Spotify account in settings to use this function',
+      fontSize: 18);
 
   @override
   Widget build(BuildContext context) {
@@ -331,15 +281,6 @@ class _SongListPageState extends State<SongListPage> {
                                               });
                                         }
                                       }),
-                                  ListTile(
-                                      title: Text('Authorize (temp)'),
-                                      onTap: () => authorize()),
-                                  ListTile(
-                                      title: Text('Retrieve (temp)'),
-                                      onTap: () => retrieve()),
-                                  ListTile(
-                                      title: Text('Reset playlist'),
-                                      onTap: () => _createPlaylist(_spotifyClient)),
                                 ]));
                       });
                 },
