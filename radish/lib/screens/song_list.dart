@@ -39,6 +39,12 @@ class _SongListPageState extends State<SongListPage> {
     });
   }
 
+  saveToUserData(user) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user);
+    storage.setString('userData', userJson);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -242,17 +248,10 @@ class _SongListPageState extends State<SongListPage> {
     }
 
     print("${response.statusCode} GOT $endpointUrl");
-    var activitiesJson = jsonDecode(response.body);
-    List<dynamic>? activitiesJ =
-        activitiesJson != null ? List.from(activitiesJson) : null;
-    if (activitiesJ == null) {
-      print("couldnt get activity logs from json");
-      return;
-    }
-
     setState(() {
-      activityLog = activitiesJ.map((log) => Log.fromJson(log)).toList();
+      user?.songs?.discovered?.add(song);
     });
+    await saveToUserData(user);
   }
 
   handleUnlike(String song) async {
@@ -277,24 +276,21 @@ class _SongListPageState extends State<SongListPage> {
     }
 
     print("${response.statusCode} GOT $endpointUrl");
-    var activitiesJson = jsonDecode(response.body);
-    List<dynamic>? activitiesJ =
-        activitiesJson != null ? List.from(activitiesJson) : null;
-    if (activitiesJ == null) {
-      print("couldnt get activity logs from json");
-      return;
-    }
-
     setState(() {
-      activityLog = activitiesJ.map((log) => Log.fromJson(log)).toList();
+      user?.songs?.discovered?.remove(song);
     });
+    await saveToUserData(user);
   }
 
   @override
   Widget build(BuildContext context) {
     Map data = ModalRoute.of(context)?.settings.arguments as Map;
     title = data["title"];
-    songs = data["songs"];
+    if (data["songs"] == null) {
+      songs = [];
+    } else {
+      songs = data["songs"];
+    }
 
     return Scaffold(
       body: Column(children: [
@@ -411,11 +407,18 @@ class _SongListPageState extends State<SongListPage> {
                                       onTap: () => retrieve()),
                                   ListTile(
                                       title: Text('Reset playlist'),
-                                      onTap: () => _createPlaylist(_spotifyClient)),
+                                      onTap: () =>
+                                          _createPlaylist(_spotifyClient)),
                                 ]));
                       });
                 },
-                onDoubleTap: () => print("liked ${songs.elementAt(index)}"),
+                onDoubleTap: () {
+                            if (isSongLiked(songs.elementAt(index))) {
+                              handleUnlike(songs.elementAt(index));
+                            } else {
+                              handleLike(songs.elementAt(index));
+                            }
+                          },
                 child: Container(
                   height: 60.0,
                   decoration: BoxDecoration(

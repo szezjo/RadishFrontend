@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:radish/models/user.dart';
+import 'package:radish/models/station.dart';
 import 'package:radish/theme/theme_config.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -14,48 +15,166 @@ class FeedPage extends StatefulWidget {
 }
 
 class _FeedPageState extends State<FeedPage> {
-
   List<Log>? activityLog;
   User? user;
 
   goToDiscoveries() async {
-      Navigator.pushNamed(context, "/discoveries", arguments: {
-        "title": "Discoveries",
-        "songs": user?.songs?.discovered,
-      });
+    Navigator.pushNamed(context, "/discoveries", arguments: {
+      "title": "Discoveries",
+      "songs": user?.songs?.discovered,
+    });
   }
 
   goToRecently() async {
-      Navigator.pushNamed(context, "/recently", arguments: {
-        "title": "Recently played",
-        "songs": user?.songs?.recently_played,
-      });
+    Navigator.pushNamed(context, "/recently", arguments: {
+      "title": "Recently played",
+      "songs": user?.songs?.recently_played,
+    });
   }
 
   goToFollowing() async {
     Navigator.pushNamed(context, "/following");
   }
 
-
   getUserData() async {
     SharedPreferences storage = await SharedPreferences.getInstance();
     var userData = storage.getString('userData');
     Map json = jsonDecode(userData.toString());
     Map<String, dynamic> stringQueryParameters =
-    json.map((key, value) => MapEntry(key.toString(), value));
+        json.map((key, value) => MapEntry(key.toString(), value));
 
     setState(() {
       user = User.fromJson(stringQueryParameters);
     });
   }
 
-  Future<Color> getImagePalette () async {
+  saveToUserData(user) async {
+    SharedPreferences storage = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user);
+    storage.setString('userData', userJson);
+  }
+
+  handleLikeSong(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_to_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.add(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlikeSong(String song) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_song_from_discovered";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'song': song}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.songs?.discovered?.remove(song);
+    });
+    await saveToUserData(user);
+  }
+
+  handleLikeStation(Station station) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "add_radio_to_favourites";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'api_id': station.api_id}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.stations?.favourites?.add(station.api_id.toString());
+    });
+    await saveToUserData(user);
+  }
+
+  handleUnlikeStation(Station station) async {
+    if (user == null) {
+      print("no user set");
+      return;
+    }
+
+    String endpointUrl = "remove_radio_from_favourites";
+
+    final response = await http.post(
+        Uri.parse('https://radish-scening.herokuapp.com/user/$endpointUrl'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({'token': user?.token, 'api_id': station.api_id}));
+
+    if (response.statusCode != 200) {
+      print("${response.statusCode} COULDN'T GET $endpointUrl");
+      print("${jsonDecode(response.body)}");
+      return;
+    }
+
+    print("${response.statusCode} GOT $endpointUrl");
+    setState(() {
+      user?.stations?.favourites?.remove(station.api_id.toString());
+    });
+    await saveToUserData(user);
+  }
+
+  Future<Color> getImagePalette() async {
     try {
       if (user?.profile?.avatar == null || user?.profile?.avatar == "") {
         return Colors.white;
       }
-      final PaletteGenerator paletteGenerator = await PaletteGenerator
-          .fromImageProvider(NetworkImage(user!.profile!.avatar!), timeout: const Duration(seconds: 1));
+      final PaletteGenerator paletteGenerator =
+          await PaletteGenerator.fromImageProvider(
+              NetworkImage(user!.profile!.avatar!),
+              timeout: const Duration(seconds: 1));
       return paletteGenerator.dominantColor?.color ?? Colors.white;
     } catch (err) {
       return Colors.white;
@@ -77,10 +196,7 @@ class _FeedPageState extends State<FeedPage> {
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode({
-          'token': user?.token
-        })
-    );
+        body: jsonEncode({'token': user?.token}));
 
     if (response.statusCode != 200) {
       print("${response.statusCode} COULDN'T GET $endpointUrl");
@@ -90,7 +206,8 @@ class _FeedPageState extends State<FeedPage> {
 
     print("${response.statusCode} GOT $endpointUrl");
     var activitiesJson = jsonDecode(response.body);
-    List<dynamic>? activitiesJ = activitiesJson != null ? List.from(activitiesJson) : null;
+    List<dynamic>? activitiesJ =
+        activitiesJson != null ? List.from(activitiesJson) : null;
     if (activitiesJ == null) {
       print("couldnt get activity logs from json");
       return;
@@ -115,176 +232,194 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-          children: [
-            Stack(
-                children: [
-                  Column( // 2 BACKGROUND COVER RECTANGLES
-                    children: [
-                      const SizedBox(height: 60.0),
-                      FutureBuilder<Color>(
-                          future: getImagePalette(),
-                          builder: (BuildContext context, AsyncSnapshot<Color> snapshot) {
-                            if (snapshot.hasData) {
-                              return Container(
-                                height: 80.0,
-                                color: snapshot.data,
-                              );
-                            }
-                            else {
-                              return Container(
-                                height: 80.0,
-                                color: ThemeConfig.darkBGSecondary,
-                              );
-                            }
-                          }),
-                      Container(
-                        height: 150.0,
+      body: Column(children: [
+        Stack(children: [
+          Column(
+            // 2 BACKGROUND COVER RECTANGLES
+            children: [
+              const SizedBox(height: 60.0),
+              FutureBuilder<Color>(
+                  future: getImagePalette(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<Color> snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        height: 80.0,
+                        color: snapshot.data,
+                      );
+                    } else {
+                      return Container(
+                        height: 80.0,
                         color: ThemeConfig.darkBGSecondary,
-                      )
-                    ],
+                      );
+                    }
+                  }),
+              Container(
+                height: 150.0,
+                color: ThemeConfig.darkBGSecondary,
+              )
+            ],
+          ),
+          Positioned(
+            // THE AVATAR & NAME & BUTTONS
+            top: 95.0,
+            left: 20.0,
+            width: MediaQuery.of(context).size.width - 40.0,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Container(
+                    color: Colors.white,
+                    child: user?.profile?.avatar != null &&
+                            user?.profile?.avatar != ""
+                        ? FadeInImage.assetNetwork(
+                            placeholder: 'images/avatarPlaceholder.png',
+                            image: user!.profile!.avatar!,
+                            height: 90.0,
+                            width: 90.0,
+                            fit: BoxFit.contain)
+                        : Image.asset('images/avatarPlaceholder.png',
+                            height: 90.0, width: 90.0, fit: BoxFit.contain),
                   ),
-                  Positioned( // THE AVATAR & NAME & BUTTONS
-                    top: 95.0,
-                    left: 20.0,
-                    width: MediaQuery.of(context).size.width - 40.0,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Container(
-                            color: Colors.white,
-                            child: user?.profile?.avatar != null && user?.profile?.avatar != "" ? FadeInImage.assetNetwork(
-                                placeholder: 'images/avatarPlaceholder.png',
-                                image: user!.profile!.avatar!,
-                                height: 90.0,
-                                width: 90.0,
-                                fit: BoxFit.contain
-                            ) : Image.asset(
-                                'images/avatarPlaceholder.png',
-                                height: 90.0,
-                                width: 90.0,
-                                fit: BoxFit.contain
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 10.0, bottom: 8.0),
-                            child: Text(
-                                user?.profile?.display_name ?? "",
-                                style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            onPressed: goToFollowing,
-                            icon: Icon(
-                              Icons.people_rounded,
-                              color: ThemeConfig.darkIcons,
-                              size: 24.0,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            onPressed: () => print("settings"),
-                            icon: Icon(
-                              Icons.settings_rounded,
-                              color: ThemeConfig.darkIcons,
-                              size: 24.0,
-                            ),
-                          ),
-                        ),
-                      ],
+                ),
+                Expanded(
+                  flex: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10.0, bottom: 8.0),
+                    child: Text(user?.profile?.display_name ?? "",
+                        style: const TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: IconButton(
+                    onPressed: goToFollowing,
+                    icon: Icon(
+                      Icons.people_rounded,
+                      color: ThemeConfig.darkIcons,
+                      size: 24.0,
                     ),
                   ),
-                  Positioned(
-                    width: MediaQuery.of(context).size.width,
-                    bottom: 30.0,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 35.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          TextButton(
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50.0),
-                                      side: BorderSide(color: ThemeConfig.darkAccentPrimary, width: 3.0)
-                                  )
-                              ),
-                              fixedSize: MaterialStateProperty.all(const Size.fromWidth(140)),
-                              overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
-                              foregroundColor: MaterialStateProperty.all(Colors.white),
-                            ),
-                            child: const Text("Discoveries"),
-                            onPressed: goToDiscoveries,
-                          ),
-                          TextButton(
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50.0),
-                                      side: BorderSide(color: ThemeConfig.darkAccentPrimary, width: 3.0)
-                                  )
-                              ),
-                              fixedSize: MaterialStateProperty.all(const Size.fromWidth(140)),
-                              overlayColor: MaterialStateProperty.all(ThemeConfig.darkAccentPrimary),
-                              foregroundColor: MaterialStateProperty.all(Colors.white),
-                            ),
-                            child: const Text("Recently played"),
-                            onPressed: goToRecently,
-                          ),
-                        ],
-                      ),
-                    ),)
-                ]
+                ),
+                Expanded(
+                  flex: 1,
+                  child: IconButton(
+                    onPressed: () => print("settings"),
+                    icon: Icon(
+                      Icons.settings_rounded,
+                      color: ThemeConfig.darkIcons,
+                      size: 24.0,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-                child: activityList(activityLog, user)
-            )
-          ]
-      ),
+          ),
+          Positioned(
+            width: MediaQuery.of(context).size.width,
+            bottom: 30.0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 35.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TextButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.0),
+                              side: BorderSide(
+                                  color: ThemeConfig.darkAccentPrimary,
+                                  width: 3.0))),
+                      fixedSize:
+                          MaterialStateProperty.all(const Size.fromWidth(140)),
+                      overlayColor: MaterialStateProperty.all(
+                          ThemeConfig.darkAccentPrimary),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    child: const Text("Discoveries"),
+                    onPressed: goToDiscoveries,
+                  ),
+                  TextButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.0),
+                              side: BorderSide(
+                                  color: ThemeConfig.darkAccentPrimary,
+                                  width: 3.0))),
+                      fixedSize:
+                          MaterialStateProperty.all(const Size.fromWidth(140)),
+                      overlayColor: MaterialStateProperty.all(
+                          ThemeConfig.darkAccentPrimary),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    child: const Text("Recently played"),
+                    onPressed: goToRecently,
+                  ),
+                ],
+              ),
+            ),
+          )
+        ]),
+        Expanded(child: activityList(activityLog, user, this))
+      ]),
     );
   }
 }
 
-Widget activityList(List <Log>? activityLog, User? user) {
-
+Widget activityList(List<Log>? activityLog, User? user, _FeedPageState parent) {
   isLiked(Log log) {
     if (log.radio != null) {
       return user!.stations!.favourites!.contains(log.radio!.api_id);
-    } else if (log.song != "" && log.song != null){
+    } else if (log.song != "" && log.song != null) {
       return user!.songs!.discovered!.contains(log.song);
     } else {
       return false;
     }
   }
 
+  handleLike(Log log) {
+    if (log.radio != null) {
+      parent.handleLikeStation(log.radio!);
+    } else if (log.song != "" && log.song != null) {
+      parent.handleLikeSong(log.song.toString());
+    } else {
+      return false;
+    }
+  }
+
+  handleUnlike(Log log) {
+    if (log.radio != null) {
+      parent.handleUnlikeStation(log.radio!);
+    } else if (log.song != "" && log.song != null) {
+      parent.handleUnlikeSong(log.song.toString());
+    } else {
+      return false;
+    }
+  }
 
   return ListView(
     padding: EdgeInsets.zero,
     scrollDirection: Axis.vertical,
     children: List.generate(activityLog?.length ?? 0, (int index) {
       return GestureDetector(
-        onDoubleTap: () => print("really liked ${activityLog!.elementAt(index).song}"),
-        onTap: () => print("listen to ${activityLog!.elementAt(index).radio!.name}"),
+        onDoubleTap: () =>
+            print("really liked ${activityLog!.elementAt(index).song}"),
+        onTap: () =>
+            print("listen to ${activityLog!.elementAt(index).radio!.name}"),
         child: Container(
           decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: ThemeConfig.darkDivider,
-                ),)
-          ),
+            bottom: BorderSide(
+              color: ThemeConfig.darkDivider,
+            ),
+          )),
           child: Row(
             children: [
               Padding(
@@ -293,33 +428,29 @@ Widget activityList(List <Log>? activityLog, User? user) {
                   borderRadius: BorderRadius.circular(8.0),
                   child: Container(
                     color: Colors.white,
-                    child: activityLog?.elementAt(index).avatar != null ? FadeInImage.assetNetwork(
-                        placeholder: 'images/avatarPlaceholder.png',
-                        image: activityLog?.elementAt(index).avatar ?? "invalid",
-                        imageErrorBuilder:
-                            (context, error, stackTrace) {
-                          return Image.asset(
-                              'images/avatarPlaceholder.png',
-                              height: 70.0,
-                              width: 70.0,
-                              fit: BoxFit.contain);
-                        },
-                        height: 70.0,
-                        width: 70.0,
-                        fit: BoxFit.contain
-                    ) : Image.asset(
-                        'images/avatarPlaceholder.png',
-                        height: 70.0,
-                        width: 70.0,
-                        fit: BoxFit.contain
-                    ),
+                    child: activityLog?.elementAt(index).avatar != null
+                        ? FadeInImage.assetNetwork(
+                            placeholder: 'images/avatarPlaceholder.png',
+                            image: activityLog?.elementAt(index).avatar ??
+                                "invalid",
+                            imageErrorBuilder: (context, error, stackTrace) {
+                              return Image.asset('images/avatarPlaceholder.png',
+                                  height: 70.0,
+                                  width: 70.0,
+                                  fit: BoxFit.contain);
+                            },
+                            height: 70.0,
+                            width: 70.0,
+                            fit: BoxFit.contain)
+                        : Image.asset('images/avatarPlaceholder.png',
+                            height: 70.0, width: 70.0, fit: BoxFit.contain),
                   ),
                 ),
               ),
               Expanded(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children:[
+                    children: [
                       Text(
                         activityLog!.elementAt(index).username ?? "",
                         style: TextStyle(
@@ -328,31 +459,36 @@ Widget activityList(List <Log>? activityLog, User? user) {
                             fontWeight: FontWeight.bold,
                             fontSize: 18.0),
                       ),
+                      Text(activityLog.elementAt(index).did ?? ""),
                       Text(
-                          activityLog.elementAt(index).did ?? ""),
-                      Text(
-                        activityLog.elementAt(index).song ?? (activityLog.elementAt(index).radio?.name ?? ""),
+                        activityLog.elementAt(index).song ??
+                            (activityLog.elementAt(index).radio?.name ?? ""),
                         style: TextStyle(
                           color: ThemeConfig.darkIcons,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ]
-                ),
+                    ]),
               ),
               IconButton(
-                onPressed: () => print(activityLog.elementAt(index).did),
-                icon: isLiked(activityLog.elementAt(index)) ?
-                Icon(
-                  Icons.favorite_rounded,
-                  color: ThemeConfig.darkAccentPrimary,
-                  size: 24.0,
-                ) :
-                Icon(
-                  Icons.favorite_outline_rounded,
-                  color: ThemeConfig.darkIcons,
-                  size: 24.0,
-                ),
+                onPressed: () {
+                  if (isLiked(activityLog.elementAt(index))) {
+                    handleUnlike(activityLog.elementAt(index));
+                  } else {
+                    handleLike(activityLog.elementAt(index));
+                  }
+                },
+                icon: isLiked(activityLog.elementAt(index))
+                    ? Icon(
+                        Icons.favorite_rounded,
+                        color: ThemeConfig.darkAccentPrimary,
+                        size: 24.0,
+                      )
+                    : Icon(
+                        Icons.favorite_outline_rounded,
+                        color: ThemeConfig.darkIcons,
+                        size: 24.0,
+                      ),
               ),
             ],
           ),
@@ -361,4 +497,3 @@ Widget activityList(List <Log>? activityLog, User? user) {
     }),
   );
 }
-
