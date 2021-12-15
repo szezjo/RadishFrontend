@@ -22,6 +22,7 @@ class _CataloguePageState extends State<CataloguePage> {
   String? categoryChosen;
   User? user;
   List<Station>? foundStations;
+  Widget _child = SizedBox(height: 60.0);
 
   getUserData() async {
     SharedPreferences storage = await SharedPreferences.getInstance();
@@ -44,13 +45,35 @@ class _CataloguePageState extends State<CataloguePage> {
 
   showStation(Station? station) async {
     if (station != null) {
+      await addToDatabase(station);
       Navigator.pushNamed(context, "/station", arguments: {
         "station": station,
       });
     }
   }
 
-  Widget _child = SizedBox(height: 60.0);
+  addToDatabase(Station? station) async {
+    print("adding ${station!.name}");
+    if (station != null) {
+        String endpointUrl = "add_to_internal_catalogue";
+
+        final response = await http.post(
+          Uri.parse('https://radish-app.herokuapp.com/radio/$endpointUrl'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode({
+            'api_id': station.api_id,
+          })
+        );
+        if (response.statusCode != 200) {
+          print("${response.statusCode} COULDN'T DO $endpointUrl");
+          print("${jsonDecode(response.body)}");
+          return;
+        }
+        print("${response.statusCode} added ${station.name}");
+    }
+  }
 
   @override
   void initState() {
@@ -271,7 +294,7 @@ Widget radioList(List<Station>? stations, Function(Station) onTap) {
     scrollDirection: Axis.vertical,
     children: List.generate(stations?.length ?? 0, (int index) {
       return GestureDetector(
-        onTap: () => onTap(stations!.elementAt(index)),
+        onTap: () => {onTap(stations!.elementAt(index))},
         child: Container(
           decoration: BoxDecoration(
               border: Border(

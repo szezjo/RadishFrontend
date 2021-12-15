@@ -30,7 +30,7 @@ class _StationSliderState extends State<StationSlider> {
     if (station != null) {
       Navigator.pushNamed(context, "/station", arguments: {
         "station": station,
-      });
+      }).then((value) => setState(() {}));
     }
   }
 
